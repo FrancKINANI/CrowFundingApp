@@ -1,9 +1,8 @@
 <?php
 session_start();
 require_once '../../Config/autoload.php';
-require_once '../Models/Project.php';
 
-// Fetch all projects
+
 $projectModel = new Project();
 $projects = $projectModel->getAll();
 
