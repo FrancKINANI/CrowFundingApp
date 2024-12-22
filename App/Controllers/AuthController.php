@@ -2,11 +2,16 @@
 require_once __DIR__ . '../Models/User.php';
 
 class AuthController {
+    private $userModel;
+    public function __construct($userModel){
+        $this->userModel = $userModel;
+    }    
     public function login($email = "", $password = "") {
         $users = User::getAll();
         foreach ($users as $user) {
             if ($user['email'] === $email && password_verify($password, $user['password'])) {
                 echo "Login successful! Welcome " . $user['name'];
+                header("Location: ../.../public/index.php?action=userDashboard");
                 return true;
             }
         }
@@ -15,7 +20,7 @@ class AuthController {
     }
 
     public function register($name = "", $email = "", $password = "") {
-        $userController = new UserController();
+        $userController = new UserController($this->userModel);
         $userController->create($name, $email, $password);
     }
 

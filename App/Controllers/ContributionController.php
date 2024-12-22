@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '../Models/Contribution.php';
+require_once __DIR__ . '/Contribution.php';
 
 class ContributionController {
     private $contributionModel;
