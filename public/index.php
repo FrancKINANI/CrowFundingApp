@@ -1,14 +1,11 @@
 <?php
 session_start();
 
-require_once '../Config/autoload.php';
+require_once __DIR__ . '/../Config/database.php';
+require_once __DIR__ . '/../App/Controllers/Router.php';
+require_once __DIR__ . '/../Config/autoload.php';
 
-$action = $_GET['action'] ?? 'home';
+use App\Core\Router;
 
-$userModel = new User();
-// $projectModel = new Project();
-$contributionModel = new Contribution();
-$fileManager = new FileManager();
-
-$router = new Router($action, $userModel, $projectModel, $contributionModel, $fileManager);
+$router = new Router();
 $router->route();

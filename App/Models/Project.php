@@ -1,47 +1,50 @@
 <?php
+
+namespace App\Models;
+
+use App\Config\Database;
+use PDO;
+
 class Project {
     private $id;
     private $title;
     private $description;
-    private $goalAmount;
-    private $collectedAmount;
-    private static $file = __DIR__ . '/projects.json';
+    private $goal;
+    private $createdBy;
 
-    public function __construct($id = 0, $title = "", $description = "", $goalAmount = "", $collectedAmount = 0) {
+    public function __construct($id = null, $title = "", $description = "", $goal = 0, $createdBy = null) {
         $this->id = $id;
         $this->title = $title;
         $this->description = $description;
-        $this->goalAmount = $goalAmount;
-        $this->collectedAmount = $collectedAmount;
+        $this->goal = $goal;
+        $this->createdBy = $createdBy;
     }
 
-    public function toArray() {
-        return [
-            'id' => $this->id,
-            'title' => $this->title,
-            'description' => $this->description,
-            'goalAmount' => $this->goalAmount,
-            'collectedAmount' => $this->collectedAmount
-        ];
-    }
-
-    public function save() {
-        $projects = self::getAll();
-        $projects[] = $this->toArray();
-        file_put_contents(self::$file, json_encode($projects, JSON_PRETTY_PRINT));
+    public static function create($title, $description, $goal, $createdBy) {
+        $pdo = Database::getConnection();
+        $sql = "INSERT INTO projects (title, description, goal, created_by) VALUES (:title, :description, :goal, :createdBy)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            'title' => $title,
+            'description' => $description,
+            'goal' => $goal,
+            'createdBy' => $createdBy
+        ]);
+        return $pdo->lastInsertId();
     }
 
     public static function getAll() {
-        return file_exists(self::$file) ? json_decode(file_get_contents(self::$file), true) : [];
+        $pdo = Database::getConnection();
+        $sql = "SELECT * FROM projects";
+        $stmt = $pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function getById($id) {
-        $projects = self::getAll();
-        foreach ($projects as $project) {
-            if ($project->getId() == $id) {
-                return $project;
-            }
-        }
-        return null;
+        $pdo = Database::getConnection();
+        $sql = "SELECT * FROM projects WHERE id = :id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }

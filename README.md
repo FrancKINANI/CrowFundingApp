@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 # Crowdfunding Platform
 
 ## Description
@@ -23,23 +21,32 @@ CrowdfundingApp/
 ├── App/
 │   ├── Controllers/
 │   │   ├── AuthController.php
-│   │   ├── CampaignController.php
+│   │   ├── ProjectController.php
+│   │   ├── HomeController.php
+│   │   ├── DonationController.php
+│   │   ├── UserController.php
 │   │   └── Router.php
 │   ├── Models/
 │   │   ├── User.php
-│   │   └── Campaign.php
+│   │   └── Project.php
+│   │   └── Donation.php
 │   └── Views/
 │       ├── auth/
 │       │   ├── login.php
 │       │   └── register.php
-│       ├── campaigns/
+│       ├── projects/
 │       │   ├── create.php
+│       │   ├── edit.php
+│       │   └── view.php
+│       └── donations/
+│       |   ├── create.php
 │       │   ├── edit.php
 │       │   └── view.php
 │       ├── home.php
 │       └── layout.php
 ├── Config/
 │   └── database.php
+│   └── autoload.php
 ├── public/
 │   ├── css/
 │   │   └── styles.css

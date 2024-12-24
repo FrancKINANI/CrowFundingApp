@@ -1,24 +1,18 @@
 <?php
 
 spl_autoload_register(function ($class) {
-    $baseDir = realpath(__DIR__ . '/../App/') . DIRECTORY_SEPARATOR;
+    $prefix = "App\\";
+    $base_dir = __DIR__ . "/../";
 
-    $directories = [
-        'Models' . DIRECTORY_SEPARATOR,
-        'Controllers' . DIRECTORY_SEPARATOR,
-        'Views' . DIRECTORY_SEPARATOR
-    ];
-
-    $classPath = $class . '.php';
-
-    foreach ($directories as $directory) {
-        $file = $baseDir . $directory . $classPath;
-
-        if (file_exists($file)) {
-            require_once $file;
-            return;
-        }
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        return;
     }
 
-    error_log("Autoload error: Unable to load class '$class' from any of the defined directories.");
+    $relative_class = substr($class, $len);
+    $file = $base_dir . str_replace("\\", "/", $relative_class) . ".php";
+
+    if (file_exists($file)) {
+        require_once $file;
+    }
 });
