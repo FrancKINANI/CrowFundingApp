@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '../Models/User.php';
+// require_once __DIR__ . '../Models/User.php';
 
 class UserController {
     private $userModel;
@@ -18,7 +18,6 @@ class UserController {
 
         $user = new User($id, $name, $email, $password);
         $user->save();
-        echo "User created successfully!";
     }
 
     public function list() {
@@ -37,7 +36,9 @@ class UserController {
     }
 
     public function dashboard() {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
         if (!isset($_SESSION['user'])) {
             header("Location: ../../public/index.php?action=login");
@@ -50,7 +51,7 @@ class UserController {
 
         $userContributions = $this->contributionModel->getByUserId($userId);
 
-        require '../App/Views/user/dashboard.php';
+        require '../Views/user/dashboard.php';
     }
 
     public function edit($email, $newName = "", $newEmail = "", $newPassword = "") {

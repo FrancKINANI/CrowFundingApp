@@ -7,4 +7,4 @@
     <input type="password" name="password" required>
     <button type="submit">Login</button>
 </form>
-<?php $content = ob_get_clean(); include '../layout.php'; ?>
+<?php $content = ob_get_clean(); include __DIR__ . '/../layout.php'; ?>

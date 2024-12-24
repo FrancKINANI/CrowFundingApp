@@ -5,7 +5,7 @@
         private $projectModel;
         private $contributionModel;
         private $fileManager;
-    
+
         const ACTIONS = [
             'home' => 'home',
             'login' => 'login',
@@ -20,11 +20,11 @@
             'editContribution' => 'editContribution',
             'deleteContribution' => 'deleteContribution',
             'listUsers' => 'listUsers',
-            'createUser ' => 'createUser ',
-            'editUser ' => 'editUser ',
-            'deleteUser ' => 'deleteUser ',
+            'createUser' => 'createUser',
+            'editUser' => 'editUser',
+            'deleteUser' => 'deleteUser',
         ];
-    
+
         public function __construct($action, $userModel, $projectModel, $contributionModel, $fileManager) {
             $this->action = $action;
             $this->userModel = $userModel;
@@ -32,7 +32,7 @@
             $this->contributionModel = $contributionModel;
             $this->fileManager = $fileManager;
         }
-    
+
         public function route() {
             try {
                 if (array_key_exists($this->action, self::ACTIONS)) {
@@ -45,11 +45,11 @@
                 echo "Error: " . $e->getMessage();
             }
         }
-    
+
         private function home() {
             require '../App/views/home.php';
         }
-    
+
         private function login() {
             $controller = new AuthController($this->userModel);
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -58,13 +58,13 @@
                 if ($email && $password) {
                     $controller->login($email, $password);
                 } else {
-                    throw new Exception("Email and password are required.");
+                    echo "<p>Email and password are required.</p>";
                 }
             } else {
-                $controller->login(); 
+                require '../App/views/auth/login.php';
             }
         }
-    
+
         private function register() {
             $controller = new AuthController($this->userModel);
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -74,23 +74,23 @@
                 if ($name && $email && $password) {
                     $controller->register($name, $email, $password);
                 } else {
-                    throw new Exception("All fields are required to register.");
+                    echo "<p>All fields are required to register.</p>";
                 }
             } else {
-                $controller->register(); // Show registration form
+                require '../App/views/auth/register.php';
             }
         }
-    
+
         private function logout() {
             $controller = new AuthController($this->userModel);
             $controller->logout();
         }
-    
+
         private function userDashboard() {
             $controller = new UserController($this->userModel, $this->projectModel, $this->contributionModel);
             $controller->dashboard();
         }
-    
+        
         private function createProject() {
             $controller = new ProjectController($this->projectModel, $this->fileManager);
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -100,13 +100,13 @@
                 if ($title && $description && $goalAmount) {
                     $controller->create($title, $description, $goalAmount);
                 } else {
-                    throw new Exception("All fields are required to create a project.");
+                    echo "<p>All fields are required to create a project.</p>";
                 }
             } else {
-                $controller->create();
+                require '../App/views/projects/create.php';
             }
         }
-    
+
         private function editProject() {
             $controller = new ProjectController($this->projectModel, $this->fileManager);
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -120,7 +120,7 @@
                     throw new Exception("All fields are required to edit a project.");
                 }
             } else {
-                $controller->edit($_POST['id'] ?? null);
+                require '../App/views/projects/edit.php';
             }
         }
     
@@ -226,10 +226,26 @@
         private function deleteUser () {
             $controller = new UserController($this->userModel);
             $email = $_POST['email'] ?? null;
-                if ($email) {
-                    $controller->delete($email);
-                } else {
-                    throw new Exception("Email is required to delete a user.");
-                }
+            if ($email) {
+                $controller->delete($email);
+            } else {
+                throw new Exception("Email is required to delete a user.");
+            }
         }
+
+        // private function createComment(){
+        //     $controller = new CommentController($this->commentModel);
+        //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        //         $text = $_POST['text'] ?? null;
+        //         $postId = $_POST['postId'] ?? null;
+        //         $userId = $_POST['userId'] ?? null;
+        //         if ($text && $postId && $userId) {
+        //             $controller->create($text, $postId, $userId);
+        //         } else {
+        //             throw new Exception("All fields are required to create a comment.");
+        //             }
+        //     } else {
+        //         $controller->create();
+        //     }
+        // }
     }

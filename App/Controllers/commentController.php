@@ -2,6 +2,10 @@
 
 // require_once __DIR__ . '../Models/Comment.php';
 class CommentController {
+    private $commentModel;
+    public function __construct($commentModel){
+        $this->commentModel = $commentModel;
+    }
     public function create($projectId, $userId, $content) {
         $comments = Comment::all();
         $id = count($comments) + 1;

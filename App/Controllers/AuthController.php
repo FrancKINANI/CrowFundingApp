@@ -1,31 +1,46 @@
 <?php
-require_once __DIR__ . '../Models/User.php';
-
+// require_once '../Models/User.php';
 class AuthController {
     private $userModel;
     public function __construct($userModel){
         $this->userModel = $userModel;
     }    
     public function login($email = "", $password = "") {
-        $users = User::getAll();
-        foreach ($users as $user) {
-            if ($user['email'] === $email && password_verify($password, $user['password'])) {
-                echo "Login successful! Welcome " . $user['name'];
-                header("Location: ../.../public/index.php?action=userDashboard");
-                return true;
-            }
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
         }
-        echo "Invalid credentials!";
+    
+        $user = User::getByEmail($email);
+    
+        if ($user !== null) {
+            if (password_verify($password, $user->getPassword())) {
+                $_SESSION['user'] = [
+                    'id' => $user->getId(),
+                    'name' => $user->getName(),
+                    'email' => $user->getEmail()
+                ];
+    
+                header("Location: /../../../public/index.php?action=userDashboard");
+                exit;
+            } else {
+                echo "Invalid credentials! (Incorrect password)";
+            }
+        } else {
+            echo "Invalid credentials! (User not found)";
+        }
+    
         return false;
     }
-
+    
     public function register($name = "", $email = "", $password = "") {
         $userController = new UserController($this->userModel);
         $userController->create($name, $email, $password);
     }
 
     public function logout() {
-        session_start();
+        if(session_status() === PHP_SESSION_NONE){
+            session_start();
+        }
         session_unset();
         session_destroy();
 

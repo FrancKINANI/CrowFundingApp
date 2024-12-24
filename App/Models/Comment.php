@@ -5,7 +5,7 @@ class Comment {
     private $projectId;
     private $userId;
     private $content;
-    private static $file = __DIR__ . '../Data/comments.json';
+    private static $file = __DIR__ . '/comments.json';
 
     public function __construct($id = 0, $projectId = 0, $userId = 0, $content = "") {
         $this->id = $id;

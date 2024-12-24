@@ -22,7 +22,7 @@
                         <a href="/index.php?action=projectDetails&id=<?= $project['id'] ?>">Details</a> |
                         <a href="/index.php?action=editProject&id=<?= $project['id'] ?>">Edit</a> |
                         <a href="/index.php?action=deleteProject&id=<?= $project['id'] ?>" 
-                           onclick="return confirm('Are you sure you want to delete this project?');">Delete</a>
+                        onclick="return confirm('Are you sure you want to delete this project?');">Delete</a>
                     </td>
                 </tr>
             <?php endforeach; ?>

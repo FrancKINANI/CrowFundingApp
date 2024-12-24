@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 # Crowdfunding Platform
 
 ## Description
@@ -118,3 +119,5 @@ For any inquiries, please contact:
 - **Name**: Your Name
 - **Email**: your.email@example.com
 - **GitHub**: https://github.com/FrancKINANI/
+=======
+>>>>>>> Stashed changes

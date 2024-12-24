@@ -1,12 +1,11 @@
 <?php
-
 class Project {
     private $id;
     private $title;
     private $description;
     private $goalAmount;
     private $collectedAmount;
-    private static $file = __DIR__ . '../Data/projects.json';
+    private static $file = __DIR__ . '/projects.json';
 
     public function __construct($id = 0, $title = "", $description = "", $goalAmount = "", $collectedAmount = 0) {
         $this->id = $id;

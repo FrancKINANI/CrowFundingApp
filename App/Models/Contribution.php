@@ -5,7 +5,7 @@ class Contribution {
     private $projectId;
     private $userId;
     private $amount;
-    private static $file = __DIR__ . '../Data/contributions.json';
+    private static $file = __DIR__ . '/contributions.json';
 
     public function __construct($id = 0, $projectId = 0, $userId = 0, $amount = 0) {
         $this->id = $id;

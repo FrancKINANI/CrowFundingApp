@@ -9,7 +9,7 @@ spl_autoload_register(function ($class) {
         'Views' . DIRECTORY_SEPARATOR
     ];
 
-    $classPath = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
+    $classPath = $class . '.php';
 
     foreach ($directories as $directory) {
         $file = $baseDir . $directory . $classPath;

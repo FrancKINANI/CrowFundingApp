@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/Project.php';
+// require_once __DIR__ . '/Project.php';
 
 class ProjectController {
     private $projectModel;

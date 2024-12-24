@@ -1,22 +1,22 @@
 <?php
-session_start();
-require_once '../../Config/autoload.php';
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    require_once __DIR__ . '/../../Config/autoload.php';
 
+    $projectModel = new Project();
+    $projects = $projectModel->getAll();
 
-$projectModel = new Project();
-$projects = $projectModel->getAll();
-
-// Start buffering to inject content into layout
-ob_start();
+    ob_start();
 ?>
 
 <div class="home">
     <h1>Welcome to the Crowdfunding Platform</h1>
-    <?php if (isset($_SESSION['user'])): ?>
+    <?php if(isset($_SESSION['user'])): ?>
         <p>Hello, <strong><?= htmlspecialchars($_SESSION['user']['username']); ?></strong>!</p>
         <a href="../../public/index.php?action=userDashboard" class="btn">Go to My Dashboard</a>
     <?php else: ?>
-        <p>Welcome! Please <a href="../../public/index.php?action=login">log in</a> or <a href="../../public/index.php?action=register">register</a> to contribute or create projects.</p>
+        <p>Welcome! Please <a href="../../public/index.php?action=login">login</a> or <a href="../../public/index.php?action=register">register</a> to contribute or create projects.</p>
     <?php endif; ?>
 
     <h2>Available Projects</h2>
@@ -37,6 +37,5 @@ ob_start();
 </div>
 
 <?php
-// Inject content into the layout
 $content = ob_get_clean();
 require 'layout.php';

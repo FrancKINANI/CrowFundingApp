@@ -33,7 +33,6 @@
                     <?php unset($_SESSION['flash']); ?>
                 </div>
             <?php endif; ?>
-
             <?= $content ?? ''; ?>
         </div>
     </main>
