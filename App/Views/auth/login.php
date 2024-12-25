@@ -1,28 +1,25 @@
 <?php
+// Set the title of the page
 $title = "Connexion";
 
+// Capture the content of the view
 ob_start();
 ?>
-<div class="container mt-5">
-    <h1 class="text-center">Connexion</h1>
+<h1>Connexion</h1>
 
-    <form action="/php/PHPCrowFundingApp/public/index.php?action=login" method="POST" class="mt-4">
-        <div class="form-group">
-            <label for="email">Email :</label>
-            <input type="email" id="email" name="email" class="form-control" required>
-        </div>
+<form action="/auth/login.php" method="POST">
+    <label for="email">Email :</label>
+    <input type="email" id="email" name="email" required>
 
-        <div class="form-group">
-            <label for="password">Password :</label>
-            <input type="password" id="password" name="password" class="form-control" required>
-        </div>
+    <label for="password">Password :</label>
+    <input type="password" id="password" name="password" required>
 
-        <button type="submit" class="btn btn-primary">Sign up</button>
-    </form>
+    <button type="submit">Log in</button>
+</form>
 
-    <p class="mt-3">Not yet subscribed? <a href="/php/PHPCrowFundingApp/App/Views/auth/register.php">Create an account</a></p>
-</div>
+<p>Not yet a subscriber? <a href="/auth/register.php">Create an account</a></p>
 <?php
 $content = ob_get_clean();
 
+// Include the main layout
 require __DIR__ . '/../layout.php';

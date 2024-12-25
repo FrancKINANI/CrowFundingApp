@@ -7,6 +7,7 @@ class Donation {
         $this->db = $db;
     }
 
+    // Ajouter une donation
     public function addDonation($amount, $projectId, $userId) {
         $query = "INSERT INTO donations (amount, project_id, user_id) VALUES (:amount, :project_id, :user_id)";
         $stmt = $this->db->prepare($query);
@@ -16,6 +17,7 @@ class Donation {
         return $stmt->execute();
     }
 
+    // Récupérer les donations pour un projet
     public function getDonationsByProject($projectId) {
         $query = "SELECT * FROM donations WHERE project_id = :project_id";
         $stmt = $this->db->prepare($query);
@@ -24,6 +26,7 @@ class Donation {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Récupérer le total des donations pour un projet
     public function getTotalDonations($projectId) {
         $query = "SELECT SUM(amount) as total FROM donations WHERE project_id = :project_id";
         $stmt = $this->db->prepare($query);

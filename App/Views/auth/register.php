@@ -1,38 +1,31 @@
 <?php
+// Set the title of the page
 $title = "Inscription";
 
+// Capture the content of the view
 ob_start();
 ?>
-<div class="container mt-5">
-    <h1 class="text-center">Inscription</h1>
+<h1>Inscription</h1>
 
-    <form action="/php/PHPCrowFundingApp/public/index.php?action=register" method="POST" class="mt-4">
-        <div class="form-group">
-            <label for="name">Nom :</label>
-            <input type="text" id="name" name="name" class="form-control" required>
-        </div>
+<form action="/auth/register.php" method="POST">
+    <label for="name">Name :</label>
+    <input type="text" id="name" name="name" required>
 
-        <div class="form-group">
-            <label for="email">Email :</label>
-            <input type="email" id="email" name="email" class="form-control" required>
-        </div>
+    <label for="email">Email :</label>
+    <input type="email" id="email" name="email" required>
 
-        <div class="form-group">
-            <label for="password">Password :</label>
-            <input type="password" id="password" name="password" class="form-control" required>
-        </div>
+    <label for="password">Password :</label>
+    <input type="password" id="password" name="password" required>
 
-        <div class="form-group">
-            <label for="confirm_password">Confirm password :</label>
-            <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
-        </div>
+    <label for="confirm_password">Confirm password :</label>
+    <input type="password" id="confirm_password" name="confirm_password" required>
 
-        <button type="submit" class="btn btn-primary">Sign up</button>
-    </form>
+    <button type="submit">Register</button>
+</form>
 
-    <p class="mt-3">Already subscribed ? <a href="/php/PHPCrowFundingApp/App/Views/auth/login.php">Connect</a></p>
-</div>
+<p>Already subscribed? <a href="/auth/login.php">Log in</a></p>
 <?php
 $content = ob_get_clean();
 
+// Include the main layout
 require __DIR__ . '/../layout.php';
