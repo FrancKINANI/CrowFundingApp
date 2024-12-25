@@ -1,86 +1,81 @@
 <?php
 
-// require_once __DIR__ . '../Models/User.php';
+require_once __DIR__ . '/../Models/User.php';
 
 class UserController {
+    private $db;
     private $userModel;
     private $projectModel;
-    private $contributionModel;
+    private $donationModel;
 
-    public function __construct($userModel, $projectModel = null, $contributionModel = null) {
-        $this->userModel = $userModel;
-        $this->projectModel = $projectModel;
-        $this->contributionModel = $contributionModel;
-    }
-    public function create($name = "", $email = "", $password = "") {
-        $users = User::getAll();
-        $id = count($users) + 1;
-
-        $user = new User($id, $name, $email, $password);
-        $user->save();
+    public function __construct($db) {
+        $this->userModel = new User($db);
     }
 
+    // Créer un nouvel utilisateur
+    public function createUser ($name, $email, $password) {
+        return $this->userModel->addUser ($name, $email, $password);
+    }
+
+    // Lister tous les utilisateurs
     public function list() {
-        $users = User::getAll();
-        return $users;
+        return $this->userModel->getAllUsers(); // Assurez-vous que cette méthode existe dans User.php
     }
 
-    public function delete($email = "") {
-        $users = User::getAll();
-        $updatedUsers = array_filter($users, function ($user) use ($email) {
-            return $user['email'] !== $email;
-        });
-
-        file_put_contents(__DIR__ . '../Data/users.json', json_encode(array_values($updatedUsers), JSON_PRETTY_PRINT));
-        echo "User deleted successfully!";
+    // Supprimer un utilisateur par email
+    public function delete($email) {
+        return $this->userModel->deleteUserByEmail($email); // Implémentez cette méthode dans User.php
     }
 
+    public function deleteUserByEmail($email) {
+        $query = "DELETE FROM users WHERE email = :email";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':email', $email);
+        return $stmt->execute();
+    }
+
+    // Afficher le tableau de bord de l'utilisateur
     public function dashboard() {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
         if (!isset($_SESSION['user'])) {
-            header("Location: ../../public/index.php?action=login");
+            header("Location: /auth/login.php");
             exit;
         }
 
         $userId = $_SESSION['user']['id'];
-
+        // Récupérer les projets et contributions de l'utilisateur
         $userProjects = $this->projectModel->getByUserId($userId);
-
-        $userContributions = $this->contributionModel->getByUserId($userId);
+        $userContributions = $this->donationModel->getByUserId($userId);
 
         require '../Views/user/dashboard.php';
     }
 
+    // Éditer les informations d'un utilisateur
     public function edit($email, $newName = "", $newEmail = "", $newPassword = "") {
-        $users = User::getAll();
+        $user = $this->userModel->getUserByEmail($email);
         
-        $userToEdit = null;
-        foreach ($users as $user) {
-            if ($user['email'] === $email) {
-                $userToEdit = $user;
-                break;
-            }
-        }
-    
-        if ($userToEdit === null) {
-            echo "User  not found!";
+        if ($user === null) {
+            echo "Utilisateur non trouvé!";
             return;
         }
-    
+
         if (!empty($newName)) {
-            $userToEdit['name'] = $newName;
+            $user['name'] = $newName;
         }
 
         if (!empty($newEmail)) {
-            $userToEdit['email'] = $newEmail;
+            $user['email'] = $newEmail;
         }
+
         if (!empty($newPassword)) {
-            $userToEdit['password'] = $newPassword;
-            file_put_contents(__DIR__ . '../Data/users.json', json_encode(array_values($users), JSON_PRETTY_PRINT));
-            echo "User  updated successfully!";
+            $user['password'] = password_hash($newPassword, PASSWORD_BCRYPT);
         }
+
+        // Vous devez implémenter une méthode de mise à jour dans le modèle User
+        // Exemple : $this->userModel->updateUser ($user);
+        echo "Utilisateur mis à jour avec succès!";
     }
 }

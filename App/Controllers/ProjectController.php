@@ -1,55 +1,71 @@
 <?php
 
-// require_once __DIR__ . '/Project.php';
+require_once __DIR__ . '/../Models/Project.php';
 
 class ProjectController {
     private $projectModel;
-    private $fileManager;
-    public function __construct($projectModel, $fileManager){
-        $this->projectModel = $projectModel;
-        $this->fileManager = $fileManager;
+
+    public function __construct($db) {
+        $this->projectModel = new Project($db);
     }
 
-    public function create($title = "", $description = "", $goalAmount = "") {
-        $projects = Project::getAll();
-        $id = count($projects) + 1;
+    // Create a new project
+    public function create($title, $description, $goalAmount, $userId) {
+        if (empty($title) || empty($description) || $goalAmount <= 0) {
+            echo "All fields are required and the goal amount must be greater than zero.";
+            return false;
+        }
 
-        $project = new Project($id, $title, $description, $goalAmount);
-        $project->save();
-        echo "Project created successfully!";
+        return $this->projectModel->addProject($title, $description, $goalAmount, $userId);
     }
 
+    // List all projects
     public function list() {
-        return Project::getAll();
+        $projects = $this->projectModel->getAllProjects();
+        require '../Views/projects/index.php'; // Display the view with the list of projects
     }
 
-    public function delete($id) {
-        FileManager::delete(__DIR__ . '/../data/projects.json', $id);
-        echo "Project deleted successfully!";
-    }
-
-    public function edit($id, $title = "", $description = "", $goalAmount = "") {
-        $project = Project::getById($id);
-        
+    // Show project details
+    public function details($projectId) {
+        $project = $this->projectModel->getProjectById($projectId);
         if ($project) {
-            $project->setTitle($title);
-            $project->setDescription($description);
-            $project->setGoalAmount($goalAmount);
-            
-            $project->save();
-            
-            echo "Project updated successfully!";
+            require '../Views/projects/view.php'; // Display the view with project details
         } else {
-            echo "Project not found!";
+            echo "Project not found.";
         }
     }
 
-    public function details($id){
-        $project = Project::getById($id);
+    // Edit a project
+    public function edit($projectId, $title, $description, $goalAmount) {
+        $project = $this->projectModel->getProjectById($projectId);
         if ($project) {
-            return $project;
+            if (!empty($title)) {
+                $project['title'] = $title;
+            }
+            if (!empty($description)) {
+                $project['description'] = $description;
+            }
+            if ($goalAmount > 0) {
+                $project['goal_amount'] = $goalAmount;
+            }
+    
+            // Mettre à jour le projet dans la base de données
+            $this->projectModel->updateProject($projectId, $project['title'], $project['description'], $project['goal_amount']);
+            echo "Project updated successfully!";
         } else {
-            return "Project not found!";
+            echo "Project not found.";
+        }
+    }
+
+    // Delete a project
+    public function delete($projectId) {
+        $project = $this->projectModel->getProjectById($projectId);
+        if ($project) {
+            // Implement the delete method in the Project model
+            // $this->projectModel->deleteProject($projectId);
+            echo "Project deleted successfully!";
+        } else {
+            echo "Project not found.";
         }
     }
 }

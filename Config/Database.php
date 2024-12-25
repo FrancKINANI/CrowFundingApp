@@ -1,28 +1,28 @@
 <?php
-namespace App\Config;
-
-use PDO;
-use PDOException;
 
 class Database {
-    private static $host = "localhost";
-    private static $dbname = "crowdfunding_db";
-    private static $username = "root";
-    private static $password = "";
-    private static $charset = "utf8mb4";
+    private static $instance = null;
+    private $connection;
 
-    private static $pdo = null;
+    private function __construct() {
+        try {
+            $host = 'localhost';
+            $dbname = 'crowdfundingDb';
+            $username = 'root';
+            $password = '';
 
-    public static function getConnection() {
-        if (self::$pdo === null) {
-            try {
-                $dsn = "mysql:host=" . self::$host . ";dbname=" . self::$dbname . ";charset=" . self::$charset;
-                self::$pdo = new PDO($dsn, self::$username, self::$password);
-                self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            } catch (PDOException $e) {
-                die("Database connection failed: " . $e->getMessage());
-            }
+            $this->connection = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+            $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            die("Database connection error : " . $e->getMessage());
         }
-        return self::$pdo;
+    }
+
+    public static function getInstance() {
+        if (self::$instance === null) {
+            self::$instance = new Database();
+        }
+        return self::$instance->connection;
     }
 }
