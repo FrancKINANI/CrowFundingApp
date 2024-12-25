@@ -1,55 +1,104 @@
 <?php
+if(!isset($_SESSION)) { 
+    session_start(); 
+}
 
-// require_once __DIR__ . '/Project.php';
+require_once __DIR__ . '/../Models/Project.php';
+require_once __DIR__ . '/../Models/User.php';
 
 class ProjectController {
     private $projectModel;
-    private $fileManager;
-    public function __construct($projectModel, $fileManager){
-        $this->projectModel = $projectModel;
-        $this->fileManager = $fileManager;
+
+    public function __construct($db) {
+        $this->projectModel = new Project($db);
     }
 
-    public function create($title = "", $description = "", $goalAmount = "") {
-        $projects = Project::getAll();
-        $id = count($projects) + 1;
+    public function createProject(){
+        require_once __DIR__ . '/../Views/projects/create.php';
+    }
+    
+    // Create a new project
+    public function create() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            if (isset($_SESSION['user'])) {
+                $user = $_SESSION['user'];
+                $userId = $user['id'];
 
-        $project = new Project($id, $title, $description, $goalAmount);
-        $project->save();
-        echo "Project created successfully!";
+                $title = $_POST['title'];
+                $description = $_POST['description'];
+                $goalAmount = $_POST['goalAmount'];
+
+                if (empty($title) || empty($description) || $goalAmount <= 0) {
+                    echo "All fields are required and the goal amount must be greater than zero.";
+                    return false;
+                }
+
+                $this->projectModel->addProject($title, $description, $goalAmount, $userId);
+                require_once __DIR__ . '/../Views/user/dashboard.php';
+            } else {
+                echo "User not logged in.";
+                return false;
+            }
+        }
+        require_once __DIR__ . '../Views/projects/create.php';
     }
 
+    // List all projects
     public function list() {
-        return Project::getAll();
+        $projects = $this->projectModel->getAllProjects();
+        require '../Views/projects/index.php'; // Display the view with the list of projects
     }
 
-    public function delete($id) {
-        FileManager::delete(__DIR__ . '/../data/projects.json', $id);
-        echo "Project deleted successfully!";
+    // Show project details
+    public function details() {
+        $projectId = $_GET['projectId'];
+        $project = $this->projectModel->getProjectById($projectId);
+        require_once __DIR__ . '/../Views/projects/details.php';
     }
 
-    public function edit($id, $title = "", $description = "", $goalAmount = "") {
-        $project = Project::getById($id);
-        
+    // Edit a project
+    public function edit($projectId, $title, $description, $goalAmount) {
+        $project = $this->projectModel->getProjectById($projectId);
         if ($project) {
-            $project->setTitle($title);
-            $project->setDescription($description);
-            $project->setGoalAmount($goalAmount);
-            
-            $project->save();
-            
+            if (!empty($title)) {
+                $project['title'] = $title;
+            }
+            if (!empty($description)) {
+                $project['description'] = $description;
+            }
+            if ($goalAmount > 0) {
+                $project['goal_amount'] = $goalAmount;
+            }
+    
+            $this->projectModel->updateProject($projectId, $project['title'], $project['description'], $project['goal_amount']);
             echo "Project updated successfully!";
         } else {
-            echo "Project not found!";
+            echo "Project not found.";
         }
     }
 
-    public function details($id){
-        $project = Project::getById($id);
+    // Delete a project
+    public function delete($projectId) {
+        $project = $this->projectModel->getProjectById($projectId);
         if ($project) {
-            return $project;
+            $this->projectModel->deleteProject($projectId);
+            echo "Project deleted successfully!";
         } else {
-            return "Project not found!";
+            echo "Project not found.";
+        }
+    }
+
+    public function dashboard() {
+        if (isset($_SESSION['user'])) {
+            $user = $_SESSION['user'];
+            $userId = $user['id'];
+
+            $userProjects = $this->projectModel->getProjectsByUserId($userId);
+
+            require_once __DIR__ . '/../Views/user/dashboard.php';
+        } else {
+            header('Location: /php/PHPCrowFundingApp/public/index.php?action=login');
+            exit;
         }
     }
 }

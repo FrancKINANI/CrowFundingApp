@@ -1,49 +1,35 @@
 <?php
 
-namespace App\Models;
-
-use App\Config\Database;
-use PDO;
-
 class Donation {
-    private $id;
-    private $amount;
-    private $userId;
-    private $projectId;
+    private $db;
 
-    public function __construct($id = null, $amount = 0, $userId = null, $projectId = null) {
-        $this->id = $id;
-        $this->amount = $amount;
-        $this->userId = $userId;
-        $this->projectId = $projectId;
+    public function __construct($db) {
+        $this->db = $db;
     }
 
-    public static function create($amount, $userId, $projectId) {
-        $pdo = Database::getConnection();
-        $sql = "INSERT INTO donations (amount, user_id, project_id) VALUES (:amount, :userId, :projectId)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            'amount' => $amount,
-            'userId' => $userId,
-            'projectId' => $projectId
-        ]);
-        return $pdo->lastInsertId();
+    public function addDonation($amount, $projectId, $userId) {
+        $query = "INSERT INTO donations (amount, project_id, user_id) VALUES (:amount, :project_id, :user_id)";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':amount', $amount);
+        $stmt->bindParam(':project_id', $projectId);
+        $stmt->bindParam(':user_id', $userId);
+        return $stmt->execute();
     }
 
-    public static function getByProject($projectId) {
-        $pdo = Database::getConnection();
-        $sql = "SELECT * FROM donations WHERE project_id = :projectId";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute(['projectId' => $projectId]);
+    public function getDonationsByProject($projectId) {
+        $query = "SELECT * FROM donations WHERE project_id = :project_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':project_id', $projectId);
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function getTotalByProject($projectId) {
-        $pdo = Database::getConnection();
-        $sql = "SELECT SUM(amount) as total FROM donations WHERE project_id = :projectId";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute(['projectId' => $projectId]);
+    public function getTotalDonations($projectId) {
+        $query = "SELECT SUM(amount) as total FROM donations WHERE project_id = :project_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':project_id', $projectId);
+        $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result['total'] ?? 0;
+        return $result['total'];
     }
 }

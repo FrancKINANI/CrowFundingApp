@@ -8,9 +8,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($title) ? htmlspecialchars($title) : 'IdeaNest'; ?></title>
+    <title>Project Details - IdeaNest</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/public/css/styles.css">
+    <link rel="stylesheet" href="/php/PHPCrowFundingApp/public/css/style.css">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -43,25 +43,37 @@
     </nav>
 
     <div class="container mt-4">
-        <main>
-            <?php
-            if (isset($content)) {
-                echo $content;
-            } else {
-                echo '<p>Content not available.</p>';
-            }
-            ?>
-        </main>
+        <h1 class="text-center"><?php echo htmlspecialchars($project['title']); ?></h1>
+        <p><?php echo htmlspecialchars($project['description']); ?></p>
+        <p><strong>Goal: </strong><?php echo htmlspecialchars($project['goal_amount']); ?> €</p>
+        <p><strong>Status: </strong><?php echo htmlspecialchars($project['status']); ?></p>
+        <a href="/php/PHPCrowFundingApp/public/index.php?action=createDonation&project_id=<?php echo $project['id']; ?>" class="btn btn-success">Donate</a>
     </div>
 
-    <footer class="text-center mt-4">
-        <div class="container">
-            <p>&copy; 2024 IdeaNest. All rights reserved.</p>
-        </div>
-    </footer>
+    <div class="container mt-5">
+        <h1><?php echo htmlspecialchars($project['title']); ?></h1>
+        <p><strong>Description :</strong> <?php echo htmlspecialchars($project['description']); ?></p>
+        <p><strong>Objectif :</strong> <?php echo htmlspecialchars($project['goal_amount']); ?> €</p>
+        <h3>Contributions</h3>
+        <ul class="list-group">
+            <?php if (!empty($donations)): ?>
+                <?php foreach ($donations as $donation): ?>
+                    <li class="list-group-item">
+                        <p><strong>Montant :</strong> <?php echo htmlspecialchars($donation['amount']); ?> €</p>
+                        <p><strong>Contributeur :</strong> <?php echo htmlspecialchars($donation['user_id']); ?></p>
+                    </li>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <li class="list-group-item">Aucune contribution pour ce projet.</li>
+            <?php endif; ?>
+        </ul>
+        <a href="/public/index.php?action=createDonation&projectId=<?= $project['id'] ?>" class="btn btn-primary mt-3">Faire un don</a>
+        <a href="/public/index.php?action=index" class="btn btn-secondary mt-3">Retour à la liste des projets</a>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
+<?php $content = ob_get_clean(); require '../layout.php'; ?>

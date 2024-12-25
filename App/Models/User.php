@@ -1,48 +1,62 @@
 <?php
 
-namespace App\Models;
-
-use App\Config\Database;
-use PDO;
-
 class User {
-    private $id;
-    private $name;
-    private $email;
-    private $password;
+    private $db;
 
-    public function __construct($id = null, $name = "", $email = "", $password = "") {
-        $this->id = $id;
-        $this->name = $name;
-        $this->email = $email;
-        $this->password = $password;
+    public function __construct($db) {
+        $this->db = $db;
     }
 
-    public static function create($name, $email, $password) {
-        $pdo = Database::getConnection();
-        $sql = "INSERT INTO users (name, email, password) VALUES (:name, :email, :password)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            'name' => $name,
-            'email' => $email,
-            'password' => password_hash($password, PASSWORD_BCRYPT)
-        ]);
-        return $pdo->lastInsertId();
-    }
-
-    public static function getByEmail($email) {
-        $pdo = Database::getConnection();
-        $sql = "SELECT * FROM users WHERE email = :email";
-        $stmt = $pdo->prepare($sql);
+    public function emailExists($email) {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE email = :email");
         $stmt->execute(['email' => $email]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return $stmt->fetchColumn() > 0;
     }
 
-    public static function authenticate($email, $password) {
-        $user = self::getByEmail($email);
+    public function addUser($name, $email, $password) {
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+        $query = "INSERT INTO users (name, email, password) VALUES (:name, :email, :password)";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':password', $hashedPassword);
+        return $stmt->execute();
+    }
+
+    public function getUserByEmail($email) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException("Invalid email format.");
+        }
+    
+        $query = "SELECT * FROM users WHERE email = :email";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    
+        if ($stmt->execute()) {
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } else {
+            throw new Exception("Database error: " . implode(", ", $stmt->errorInfo()));
+        }
+    }
+    
+
+    public function getAllUsers(){
+        $query = "SELECT * FROM users";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function authenticate($email, $password) {
+        $user = $this->getUserByEmail($email);
         if ($user && password_verify($password, $user['password'])) {
             return $user;
         }
         return false;
+    }
+    public function deleteUserByEmail($email){
+        $query = "DELETE FROM users WHERE email = :email";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':email', $email);
+        return $stmt->execute();
     }
 }
