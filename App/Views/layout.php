@@ -12,7 +12,6 @@ if (!isset($_SESSION)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($title) ? htmlspecialchars($title) : 'IdeaNest'; ?></title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/public/css/styles.css">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -24,6 +23,9 @@ if (!isset($_SESSION)) {
             <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link" href="/php/PHPCrowFundingApp/public/index.php?action=home">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/php/PHPCrowFundingApp/public/index.php?action=list">Projects</a>
                 </li>
                 <?php if (!isset($_SESSION['user'])): ?>
                     <li class="nav-item">

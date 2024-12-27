@@ -4,6 +4,11 @@ if (!isset($_SESSION)) {
 }
 ?>
 <div class="container mt-5">
+<?php if (isset($error) && $error): ?>
+    <div class="alert alert-danger">
+        <?php echo htmlspecialchars($error); ?>
+    </div>
+<?php endif; ?>
     <h1>Title: <?php echo htmlspecialchars($project['title']); ?></h1>
     <p><strong>Description :</strong> <?php echo htmlspecialchars($project['description']); ?></p>
     <p><strong>Goal :</strong> <?php echo htmlspecialchars($project['goal_amount']); ?> €</p>

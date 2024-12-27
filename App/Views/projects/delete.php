@@ -5,6 +5,11 @@ if (!isset($_SESSION)) {
 ?>
 <div class="container mt-4">
     <h1 class="text-center">Delete Project</h1>
+    <?php if (isset($error) && $error): ?>
+        <div class="alert alert-danger">
+            <?php echo htmlspecialchars($error); ?>
+        </div>
+    <?php endif; ?>
     <p>Are you sure you want to delete the project <strong><?php echo htmlspecialchars($project['title']); ?></strong>?</p>
     <form action="/php/PHPCrowFundingApp/public/index.php?action=confirmDeleteProject&project_id=<?= htmlspecialchars($project['id']) ?>" method="POST">
         <button type="submit" class="btn btn-danger">Yes, delete it</button>

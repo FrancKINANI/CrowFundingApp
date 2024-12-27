@@ -1,6 +1,11 @@
 <?php ob_start(); ?>
 <div class="container mt-5">
     <h1 class="text-center">Projects</h1>
+    <?php if (isset($error) && $error): ?>
+        <div class="alert alert-danger">
+            <?php echo htmlspecialchars($error); ?>
+        </div>
+    <?php endif; ?>
     <ul class="list-group">
         <?php foreach ($projects as $project): ?>
             <li class="list-group-item">

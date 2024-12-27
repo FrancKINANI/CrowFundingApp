@@ -7,6 +7,11 @@ ob_start();
 ?>
 <div class="container mt-4">
     <h1 class="text-center">Dashboard</h1>
+    <?php if (isset($error) && $error): ?>
+        <div class="alert alert-danger">
+            <?php echo htmlspecialchars($error); ?>
+        </div>
+    <?php endif; ?>
     <div class="row">
         <div class="col-md-12">
             <p class="text-center">Welcome to your dashboard <strong><?php echo htmlspecialchars($user['name']) ?></strong> !</p>

@@ -22,14 +22,14 @@ class DonationController {
             $totalDonations = $this->donationModel->getTotalDonations($projectId);
             $project = $this->projectModel->getProjectById($projectId);
             if($totalDonations >= $project['goal_amount']){
-                echo "The goal amount for this project has already been reached.";
+                $error = "The goal amount for this project has already been reached.";
                 header('Location: ' . $_SERVER['HTTP_REFERER']);
                 return false;
             }
             if ($project) {
                 require_once __DIR__ . '/../Views/donation/create.php';
             } else {
-                echo "Project not found.";
+                $error = "Project not found.";
                 exit;
             }
         } else {
@@ -48,7 +48,7 @@ class DonationController {
                     $amount = $_POST['amount'];
 
                     if ($amount <= 0) {
-                        echo "The donation amount must be greater than zero.";
+                        $error = "The donation amount must be greater than zero.";
                         header('Location: ' . $_SERVER['HTTP_REFERER']);
                         return false;
                     }
@@ -56,7 +56,7 @@ class DonationController {
                     $project = $this->projectModel->getProjectById($projectId);
                     $totalDonations = $this->donationModel->getTotalDonations($projectId);
                     if ($totalDonations >= $project['goal_amount']) {
-                        echo "The goal amount for this project has already been reached.";
+                        $error =  "The goal amount for this project has already been reached.";
                         header('Location: ' . $_SERVER['HTTP_REFERER']);
                         return false;
                     }
@@ -65,15 +65,15 @@ class DonationController {
                     header('Location: /php/PHPCrowFundingApp/public/index.php?action=dashboard');
                     exit;
                 } else {
-                    echo "Project ID not provided.";
+                    $error = "Project ID not provided.";
                     return false;
                 }
             } else {
-                echo "User not logged in.";
+                $error = "User not logged in.";
                 return false;
             }
         } else {
-            echo "Invalid request method.";
+            $error = "Invalid request method.";
             return false;
         }
     }
@@ -85,7 +85,7 @@ class DonationController {
         if ($donation) {
             require_once __DIR__ . '/../Views/donation/edit.php';
         } else {
-            echo "Donation not found.";
+            $error = "Donation not found.";
             exit;
         }
     }
@@ -102,7 +102,7 @@ class DonationController {
             if ($donation) {
                 require_once __DIR__ . '/../Views/donation/edit.php';
             } else {
-                echo "Donation not found.";
+                $error = "Donation not found.";
                 exit;
             }
         } else {
@@ -120,7 +120,7 @@ class DonationController {
             $userId = $_SESSION['user']['id'];
 
             if ($amount <= 0) {
-                echo "The donation amount must be greater than zero.";
+                $error = "The donation amount must be greater than zero.";
                 return false;
             }
 
@@ -143,7 +143,7 @@ class DonationController {
             if ($donation) {
                 require_once __DIR__ . '/../Views/donation/delete.php';
             } else {
-                echo "Donation not found.";
+                $error = "Donation not found.";
                 exit;
             }
         } else {
@@ -160,7 +160,7 @@ class DonationController {
                 header('Location: /php/PHPCrowFundingApp/public/index.php?action=dashboard');
                 exit;
             } else {
-                echo "Donation ID not provided.";
+                $error = "Donation ID not provided.";
                 exit;
             }
         }

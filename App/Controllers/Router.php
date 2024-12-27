@@ -3,8 +3,7 @@
 if(!isset($_SESSION)) { 
     session_start(); 
 }
-// require_once __DIR__ . '/../../Config/Database.php';
-// require_once __DIR__ . '/../../Config/autoload.php';
+
 require_once __DIR__ . '/../../App/Controllers/HomeController.php';
 require_once __DIR__ . '/../../App/Controllers/ProjectController.php';
 require_once __DIR__ . '/../../App/Controllers/AuthController.php';
@@ -65,11 +64,11 @@ class Router {
                     $controller->$methodName();
                 } else {
                     $this->handleError(500);
-                    echo "Method not found: " . $methodName;
+                    $error = "Method not found: " . $methodName;
                 }
             } else {
                 $this->handleError(500);
-                echo "Controller class not found: " . $controllerClass;
+                $error = "Controller class not found: " . $controllerClass;
             }
         } else {
             $this->handleError(404);
@@ -80,13 +79,13 @@ class Router {
         http_response_code($code);
         switch ($code) {
             case 404:
-                echo "404 - Page not found.";
+                $error = "404 - Page not found.";
                 break;
             case 500:
-                echo "500 - Internal Server Error.";
+                $error = "500 - Internal Server Error.";
                 break;
             default:
-                echo "An unexpected error occurred.";
+                $error = "An unexpected error occurred.";
                 break;
         }
     }

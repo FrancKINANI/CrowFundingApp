@@ -36,7 +36,6 @@ class ProjectController {
         require __DIR__ . '/../Views/projects/list.php';
     }
 
-    // Show project details
     public function details() {
         if (isset($_GET['id'])) {
             $projectId = $_GET['id'];
@@ -68,7 +67,7 @@ class ProjectController {
             if ($project) {
                 require_once __DIR__ . '/../Views/projects/edit.php';
             } else {
-                echo "Project not found.";
+                $error = "Project not found.";
                 exit;
             }
         } else {
@@ -86,7 +85,7 @@ class ProjectController {
                 $goalAmount = $_POST['goalAmount'];
 
                 if (empty($title) || empty($description) || $goalAmount <= 0) {
-                    echo "All fields are required and the goal amount must be greater than zero.";
+                    $error = "All fields are required and the goal amount must be greater than zero.";
                     return false;
                 }
 
@@ -94,7 +93,7 @@ class ProjectController {
                 header('Location: /php/PHPCrowFundingApp/public/index.php?action=dashboard');
                 exit;
             } else {
-                echo "Project ID not provided.";
+                $error = "Project ID not provided.";
                 exit;
             }
         }
@@ -107,7 +106,7 @@ class ProjectController {
             if ($project) {
                 require_once __DIR__ . '/../Views/projects/delete.php';
             } else {
-                echo "Project not found.";
+                $error = "Project not found.";
                 exit;
             }
         } else {
@@ -124,7 +123,7 @@ class ProjectController {
                 header('Location: /php/PHPCrowFundingApp/public/index.php?action=dashboard');
                 exit;
             } else {
-                echo "Project ID not provided.";
+                $error = "Project ID not provided.";
                 exit;
             }
         }

@@ -32,7 +32,7 @@ class AuthController {
             $password = $_POST['password'];
     
             if (empty($email) || empty($password)) {
-                echo "Email and password are required.";
+                $error = "Email and password are required.";
             } else {
                 $user = $this->userModel->getUserByEmail($email);
     
@@ -58,10 +58,10 @@ class AuthController {
                         require_once __DIR__ . '/../Views/user/dashboard.php';
                         exit;
                     }else{
-                            echo "User not found.";
+                            $error = "User not found.";
                     }
                 } else {
-                    echo "Incorrect email or password.";
+                    $error = "Incorrect email or password.";
                 }
             }
         }
@@ -71,6 +71,7 @@ class AuthController {
     
 
     public function register() {
+        $error = null;
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $name = trim($_POST['name']);
             $email = trim($_POST['email']);
@@ -110,10 +111,10 @@ class AuthController {
                             header('Location: /php/PHPCrowFundingApp/public/index.php?action=dashboard');
                             exit;
                         } else {
-                            echo "User not found.";
+                            $error = "User ID not found.";
                         }
                     } else {
-                        $error = "An error occurred.";
+                        $error = "An error occurred while creating the user.";
                     }
                 }
             }

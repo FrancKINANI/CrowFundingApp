@@ -6,6 +6,11 @@
 <div class="container mt-4">
     <h1 class="text-center">Make a Donation</h1>
     <form action="/php/PHPCrowFundingApp/public/index.php?action=submitDonation&project_id=<?= htmlspecialchars($_GET['project_id']) ?>" method="POST">
+    <?php if (isset($error) && $error): ?>
+        <div class="alert alert-danger">
+            <?php echo htmlspecialchars($error); ?>
+        </div>
+    <?php endif; ?>
         <div class="form-group">
         <h1>Title: <?php echo htmlspecialchars($project['title']); ?></h1>
         <p><strong>Description :</strong> <?php echo htmlspecialchars($project['description']); ?></p>

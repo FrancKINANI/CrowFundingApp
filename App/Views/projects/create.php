@@ -1,6 +1,11 @@
 <?php $title = "New Project"; ob_start(); ?>
 <div class="container mt-5">
     <h1 class="text-center">Create a project</h1>
+    <?php if (isset($error) && $error): ?>
+        <div class="alert alert-danger">
+            <?php echo htmlspecialchars($error); ?>
+        </div>
+    <?php endif; ?>
     <form action="/php/PHPCrowFundingApp/public/index.php?action=create" method="POST" class="mt-4">
         <div class="form-group">
             <label for="title">Title :</label>

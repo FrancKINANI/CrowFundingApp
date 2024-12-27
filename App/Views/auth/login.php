@@ -7,6 +7,11 @@ ob_start();
     <h1 class="text-center">Connexion</h1>
     <div class="row justify-content-center">
         <div class="col-md-6">
+            <?php if (isset($error) && $error): ?>
+                <div class="alert alert-danger">
+                    <?php echo htmlspecialchars($error); ?>
+                </div>
+            <?php endif; ?>
             <form action="/php/PHPCrowFundingApp/public/index.php?action=login" method="POST">
                 <div class="form-group">
                     <label for="email">Email :</label>

@@ -5,6 +5,11 @@ if (!isset($_SESSION)) {
 ?>
 <div class="container mt-4">
     <h1 class="text-center">Edit Project</h1>
+    <?php if (isset($error) && $error): ?>
+        <div class="alert alert-danger">
+            <?php echo htmlspecialchars($error); ?>
+        </div>
+    <?php endif; ?>
     <form action="/php/PHPCrowFundingApp/public/index.php?action=updateProject&project_id=<?= htmlspecialchars($project['id']) ?>" method="POST">
         <div class="form-group">
             <label for="title">Title</label>

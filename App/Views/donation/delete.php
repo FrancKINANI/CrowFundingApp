@@ -5,6 +5,11 @@ if (!isset($_SESSION)) {
 ?>
 <div class="container mt-4">
     <h1 class="text-center">Delete Donation</h1>
+    <?php if (isset($error) && $error): ?>
+        <div class="alert alert-danger">
+            <?php echo htmlspecialchars($error); ?>
+        </div>
+    <?php endif; ?>
     <p>Are you sure you want to delete the donation of <strong><?php echo htmlspecialchars($donation['amount']); ?> €</strong> for the project <strong><?php echo htmlspecialchars($project['title']); ?></strong>?</p>
     <form action="/php/PHPCrowFundingApp/public/index.php?action=confirmDeleteDonation&id=<?= htmlspecialchars($donation['id']) ?>" method="POST">
         <button type="submit" class="btn btn-danger">Yes, delete it</button>

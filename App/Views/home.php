@@ -6,6 +6,12 @@
 ?>    
 <div class="container mt-4">
 <h1 class="text-center">List of projects</h1>
+<hr class="my-4">
+<?php if (isset($error) && $error): ?>
+    <div class="alert alert-danger">
+        <?php echo htmlspecialchars($error); ?>
+    </div>
+<?php endif; ?>
 <div class="row">
     <?php if (!empty($projects)): ?>
         <?php foreach ($projects as $project): ?>
