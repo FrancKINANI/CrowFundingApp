@@ -14,7 +14,8 @@ class User {
         $stmt->bindParam(':name', $name);
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':password', $hashedPassword);
-        return $stmt->execute();
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?? []; 
     }
 
     public function getUserByEmail($email) {
@@ -43,5 +44,19 @@ class User {
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':email', $email);
         return $stmt->execute();
+    }
+    public function emailExists($email) {
+        $query = "SELECT * FROM users WHERE email = :email";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getUserById($userId) {
+        $stmt = $this->db->prepare('SELECT * FROM users WHERE id = :id');
+        $stmt->bindParam(':id', $userId);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }

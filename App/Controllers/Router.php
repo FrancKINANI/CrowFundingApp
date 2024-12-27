@@ -1,64 +1,92 @@
 <?php
 
-require_once __DIR__ . '/../Config/database.php';
-require_once __DIR__ . '/../Config/autoload.php';
+if(!isset($_SESSION)) { 
+    session_start(); 
+}
+// require_once __DIR__ . '/../../Config/Database.php';
+// require_once __DIR__ . '/../../Config/autoload.php';
+require_once __DIR__ . '/../../App/Controllers/HomeController.php';
+require_once __DIR__ . '/../../App/Controllers/ProjectController.php';
+require_once __DIR__ . '/../../App/Controllers/AuthController.php';
+require_once __DIR__ . '/../../App/Controllers/UserController.php';
+require_once __DIR__ . '/../../App/Controllers/DonationController.php';
+
+
 
 class Router {
     private $db;
-    
+    private $routes = [];
 
-    public function __construct($db) {
+    public function __construct($db, $action, $method) {
         $this->db = $db;
+        $this->defineRoutes();
+        $this->handleRequest($action, $method);
     }
 
-    public function handleRequest() {
-        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $method = $_SERVER['REQUEST_METHOD'];
-    
-        switch ($uri) {
-            case '/':
-                $controller = new HomeController($this->db);
-                $controller->index();
-                break;
-    
-            case '/auth/login':
-                $controller = new AuthController($this->db);
-                $controller->login();
-                break;
-    
-            case '/auth/register':
-                $controller = new AuthController($this->db);
-                $controller->register();
-                break;
-    
-            case '/projects':
-                $controller = new ProjectController($this->db);
-                if ($method === 'GET') {
-                    $controller->list();
+    private function defineRoutes() {
+        $this->routes = [
+            'GET' => [
+                'home' => [HomeController::class, 'index'],
+                'login' => [AuthController::class, 'showLoginForm'],
+                'register' => [AuthController::class, 'showRegisterForm'],
+                'create' => [ProjectController::class, 'createProject'],
+                'dashboard' => [UserController::class, 'dashboard'],
+                'donate' => [DonationController::class, 'createDonation'],
+                'projectDetails' => [ProjectController::class, 'details'],
+                'logout' => [AuthController::class, 'logout'],
+                'list' => [ProjectController::class, 'list'],
+                'editProject' => [ProjectController::class, 'edit'],
+                'editDonation' => [DonationController::class, 'edit'],
+                'deleteProject' => [ProjectController::class, 'delete'],
+                'deleteDonation' => [DonationController::class, 'deleteDonation'],
+            ],
+            'POST' => [
+                'login' => [AuthController::class, 'login'],
+                'register' => [AuthController::class, 'register'],
+                'create' => [ProjectController::class, 'create'],
+                'submitDonation' => [DonationController::class, 'submit'],
+                'updateProject' => [ProjectController::class, 'updateProject'],
+                'updateDonation' => [DonationController::class, 'updateDonation'],
+                'confirmDeleteProject' => [ProjectController::class, 'confirmDelete'],
+                'confirmDeleteDonation' => [DonationController::class, 'confirmDeleteDonation'],
+            ]
+        ];
+    }
+
+    public function handleRequest($action, $method) {
+        if (isset($this->routes[$method][$action])) {
+            list($controllerClass, $methodName) = $this->routes[$method][$action];
+            error_log("Attempting to load controller: " . $controllerClass);
+
+            if (class_exists($controllerClass)) {
+                $controller = new $controllerClass($this->db);
+                
+                if (method_exists($controller, $methodName)) {
+                    $controller->$methodName();
                 } else {
-                    // Gérer les autres méthodes si nécessaire
+                    $this->handleError(500);
+                    echo "Method not found: " . $methodName;
                 }
-                break;
-    
-            case '/donations':
-                $controller = new DonationController($this->db);
-                if ($method === 'POST') {
-                    // Ajouter un don
-                    $amount = $_POST['amount'];
-                    $projectId = $_POST['project_id'];
-                    $userId = $_POST['user_id']; // Assurez-vous que l'ID de l'utilisateur est disponible
-                    $controller->addDonation($amount, $projectId, $userId);
-                } else {
-                    // Récupérer les dons pour un projet
-                    $projectId = $_GET['project_id'];
-                    $donations = $controller->getDonationsByProject($projectId);
-                    // Afficher les dons (vous pouvez appeler une vue ici)
-                }
-                break;
-    
-            default:
-                http_response_code(404);
+            } else {
+                $this->handleError(500);
+                echo "Controller class not found: " . $controllerClass;
+            }
+        } else {
+            $this->handleError(404);
+        }
+    }
+
+    private function handleError($code) {
+        http_response_code($code);
+        switch ($code) {
+            case 404:
                 echo "404 - Page not found.";
+                break;
+            case 500:
+                echo "500 - Internal Server Error.";
+                break;
+            default:
+                echo "An unexpected error occurred.";
                 break;
         }
     }

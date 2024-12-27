@@ -1,6 +1,9 @@
 <?php
 
 require_once __DIR__ . '/../Models/User.php';
+require_once __DIR__ . '/../Models/Project.php';
+require_once __DIR__ . '/../Models/Donation.php';
+
 
 class UserController {
     private $db;
@@ -10,72 +13,43 @@ class UserController {
 
     public function __construct($db) {
         $this->userModel = new User($db);
+        $this->projectModel = new Project($db);
+        $this->donationModel = new Donation($db);
     }
 
-    // Créer un nouvel utilisateur
     public function createUser ($name, $email, $password) {
         return $this->userModel->addUser ($name, $email, $password);
     }
-
-    // Lister tous les utilisateurs
     public function list() {
-        return $this->userModel->getAllUsers(); // Assurez-vous que cette méthode existe dans User.php
+        return $this->userModel->getAllUsers();
     }
-
-    // Supprimer un utilisateur par email
-    public function delete($email) {
-        return $this->userModel->deleteUserByEmail($email); // Implémentez cette méthode dans User.php
-    }
-
-    public function deleteUserByEmail($email) {
-        $query = "DELETE FROM users WHERE email = :email";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':email', $email);
-        return $stmt->execute();
-    }
-
-    // Afficher le tableau de bord de l'utilisateur
     public function dashboard() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        if (isset($_SESSION['user'])) {
+            $user = $_SESSION['user'];
+            $userId = $user['id'];
 
-        if (!isset($_SESSION['user'])) {
-            header("Location: /auth/login.php");
+            $userProjects = $this->projectModel->getProjectsByUserId($userId);
+
+            $userDonations = $this->donationModel->getDonationsByUserId($userId);
+
+            $donationProjects = [];
+            $totalInvested = 0;
+            foreach ($userDonations as $donation) {
+                $projectId = $donation['project_id'];
+                $project = $this->projectModel->getProjectById($projectId);
+                $totalDonations = $this->donationModel->getTotalDonations($projectId);
+                $goalAmount = $project['goal_amount'];
+                $percentageRemaining = 100 - (($totalDonations / $goalAmount) * 100);
+                $project['total_donations'] = $totalDonations;
+                $project['percentage_remaining'] = floor($percentageRemaining);
+                $donationProjects[$projectId] = $project;
+                $totalInvested += $donation['amount'];
+            }
+
+            require_once __DIR__ . '/../Views/user/dashboard.php';
+        } else {
+            header('Location: /php/PHPCrowFundingApp/public/index.php?action=login');
             exit;
         }
-
-        $userId = $_SESSION['user']['id'];
-        // Récupérer les projets et contributions de l'utilisateur
-        $userProjects = $this->projectModel->getByUserId($userId);
-        $userContributions = $this->donationModel->getByUserId($userId);
-
-        require '../Views/user/dashboard.php';
-    }
-
-    // Éditer les informations d'un utilisateur
-    public function edit($email, $newName = "", $newEmail = "", $newPassword = "") {
-        $user = $this->userModel->getUserByEmail($email);
-        
-        if ($user === null) {
-            echo "Utilisateur non trouvé!";
-            return;
-        }
-
-        if (!empty($newName)) {
-            $user['name'] = $newName;
-        }
-
-        if (!empty($newEmail)) {
-            $user['email'] = $newEmail;
-        }
-
-        if (!empty($newPassword)) {
-            $user['password'] = password_hash($newPassword, PASSWORD_BCRYPT);
-        }
-
-        // Vous devez implémenter une méthode de mise à jour dans le modèle User
-        // Exemple : $this->userModel->updateUser ($user);
-        echo "Utilisateur mis à jour avec succès!";
     }
 }

@@ -1,31 +1,36 @@
 <?php
-// Set the title of the page
-$title = "Inscription";
-
-// Capture the content of the view
-ob_start();
+    if(!isset($_SESSION)){
+        session_start();
+    }
+    ob_start();
 ?>
-<h1>Inscription</h1>
-
-<form action="/auth/register.php" method="POST">
-    <label for="name">Name :</label>
-    <input type="text" id="name" name="name" required>
-
-    <label for="email">Email :</label>
-    <input type="email" id="email" name="email" required>
-
-    <label for="password">Password :</label>
-    <input type="password" id="password" name="password" required>
-
-    <label for="confirm_password">Confirm password :</label>
-    <input type="password" id="confirm_password" name="confirm_password" required>
-
-    <button type="submit">Register</button>
-</form>
-
-<p>Already subscribed? <a href="/auth/login.php">Log in</a></p>
+<div class="container mt-5">
+    <h1 class="text-center">Inscription</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form action="/php/PHPCrowFundingApp/public/index.php?action=register" method="POST">
+                <div class="form-group">
+                    <label for="name">Name :</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email :</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password :</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="password_confirmation">Password Confirmation :</label>
+                    <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required> 
+                </div> 
+                <button type="submit" class="btn btn-primary btn-block">Register</button>
+            </form>
+            <p class="text-center mt-3">Already have an account? <a href="/php/PHPCrowFundingApp/public/index.php?action=login">Log in</a></p>
+        </div>
+    </div>
+</div>
 <?php
 $content = ob_get_clean();
-
-// Include the main layout
 require __DIR__ . '/../layout.php';

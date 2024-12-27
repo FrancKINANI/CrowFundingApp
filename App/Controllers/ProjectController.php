@@ -1,71 +1,132 @@
 <?php
 
 require_once __DIR__ . '/../Models/Project.php';
+require_once __DIR__ . '/../Models/User.php';
+require_once __DIR__ . '/../Models/Donation.php';
+
 
 class ProjectController {
     private $projectModel;
+    private $donationModel;
+    private $userModel;
 
     public function __construct($db) {
         $this->projectModel = new Project($db);
+        $this->donationModel = new Donation($db);
+        $this->userModel = new User($db);
     }
 
-    // Create a new project
-    public function create($title, $description, $goalAmount, $userId) {
-        if (empty($title) || empty($description) || $goalAmount <= 0) {
-            echo "All fields are required and the goal amount must be greater than zero.";
-            return false;
+    public function createProject(){
+        require __DIR__ . '/../Views/projects/create.php';
+    }
+
+    public function create(){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            $projectTitle = $_POST['title'];
+            $projectDescription = $_POST['description'];
+            $projectGoal = $_POST['goalAmount']; 
+            $projectUser_id = $_SESSION['user']['id'];
+            $this->projectModel->addProject($projectTitle, $projectDescription, $projectGoal, $projectUser_id);
+            require __DIR__ . '/../Views/projects/list.php';
         }
-
-        return $this->projectModel->addProject($title, $description, $goalAmount, $userId);
     }
 
-    // List all projects
     public function list() {
         $projects = $this->projectModel->getAllProjects();
-        require '../Views/projects/index.php'; // Display the view with the list of projects
+        require __DIR__ . '/../Views/projects/list.php';
     }
 
     // Show project details
-    public function details($projectId) {
-        $project = $this->projectModel->getProjectById($projectId);
-        if ($project) {
-            require '../Views/projects/view.php'; // Display the view with project details
+    public function details() {
+        if (isset($_GET['id'])) {
+            $projectId = $_GET['id'];
+            $project = $this->projectModel->getProjectById($projectId);
+            $donations = $this->donationModel->getDonationsByProject($projectId);
+
+            $donors = [];
+            foreach ($donations as $donation) {
+                $userId = $donation['user_id'];
+                $user = $this->userModel->getUserById($userId);
+                $donors[$donation['id']] = $user;
+            }
+
+            $totalDonations = $this->donationModel->getTotalDonations($projectId);
+            $goalAmount = $project['goal_amount'];
+            $percentageRemaining = 100 - (($totalDonations / $goalAmount) * 100);
+
+            require_once __DIR__ . '/../Views/projects/details.php';
         } else {
-            echo "Project not found.";
+            header('Location: /php/PHPCrowFundingApp/public/index.php?action=home');
+            exit;
         }
     }
 
-    // Edit a project
-    public function edit($projectId, $title, $description, $goalAmount) {
-        $project = $this->projectModel->getProjectById($projectId);
-        if ($project) {
-            if (!empty($title)) {
-                $project['title'] = $title;
+    public function edit() {
+        if (isset($_GET['project_id'])) {
+            $projectId = $_GET['project_id'];
+            $project = $this->projectModel->getProjectById($projectId);
+            if ($project) {
+                require_once __DIR__ . '/../Views/projects/edit.php';
+            } else {
+                echo "Project not found.";
+                exit;
             }
-            if (!empty($description)) {
-                $project['description'] = $description;
-            }
-            if ($goalAmount > 0) {
-                $project['goal_amount'] = $goalAmount;
-            }
-    
-            // Mettre à jour le projet dans la base de données
-            $this->projectModel->updateProject($projectId, $project['title'], $project['description'], $project['goal_amount']);
-            echo "Project updated successfully!";
         } else {
-            echo "Project not found.";
+            header('Location: /php/PHPCrowFundingApp/public/index.php?action=dashboard');
+            exit;
         }
     }
 
-    // Delete a project
-    public function delete($projectId) {
-        $project = $this->projectModel->getProjectById($projectId);
-        if ($project) {
-            // Implement the delete method in the Project model
-            // $this->projectModel->deleteProject($projectId);
-            echo "Project deleted successfully!";
+    public function updateProject() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            if (isset($_GET['project_id'])) {
+                $projectId = $_GET['project_id'];
+                $title = $_POST['title'];
+                $description = $_POST['description'];
+                $goalAmount = $_POST['goalAmount'];
+
+                if (empty($title) || empty($description) || $goalAmount <= 0) {
+                    echo "All fields are required and the goal amount must be greater than zero.";
+                    return false;
+                }
+
+                $this->projectModel->updateProject($projectId, $title, $description, $goalAmount);
+                header('Location: /php/PHPCrowFundingApp/public/index.php?action=dashboard');
+                exit;
+            } else {
+                echo "Project ID not provided.";
+                exit;
+            }
+        }
+    }
+
+    public function delete() {
+        if (isset($_GET['project_id'])) {
+            $projectId = $_GET['project_id'];
+            $project = $this->projectModel->getProjectById($projectId);
+            if ($project) {
+                require_once __DIR__ . '/../Views/projects/delete.php';
+            } else {
+                echo "Project not found.";
+                exit;
+            }
         } else {
-            echo "Project not found.";
+            header('Location: /php/PHPCrowFundingApp/public/index.php?action=dashboard');
+            exit;
+        }
+    }
+
+    public function confirmDelete() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            if (isset($_GET['project_id'])) {
+                $projectId = $_GET['project_id'];
+                $this->projectModel->deleteProject($projectId);
+                header('Location: /php/PHPCrowFundingApp/public/index.php?action=dashboard');
+                exit;
+            } else {
+                echo "Project ID not provided.";
+                exit;
+            }
         }
     }
 }

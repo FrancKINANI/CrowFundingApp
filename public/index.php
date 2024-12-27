@@ -10,5 +10,3 @@ $method = $_SERVER['REQUEST_METHOD'];
 require_once __DIR__ . '/../App/Controllers/Router.php';
 
 $router = new Router($db, $action, $method);
-
-$router->handleRequest();

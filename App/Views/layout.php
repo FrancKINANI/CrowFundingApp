@@ -1,36 +1,71 @@
+<?php
+if (!isset($_SESSION)) {
+    session_start();
+    ob_start();
+}
+?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($title) ? htmlspecialchars($title) : 'Crowdfunding'; ?></title>
+    <title><?php echo isset($title) ? htmlspecialchars($title) : 'IdeaNest'; ?></title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="/public/css/styles.css">
 </head>
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/auth/login.php">Login</a></li>
-                <li><a href="/auth/register.php">Registration</a></li>
-                <li><a href="/projects/create.php">Create a new project</a></li>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/php/PHPCrowFundingApp/public/index.php">IdeaNest</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/php/PHPCrowFundingApp/public/index.php?action=home">Home</a>
+                </li>
+                <?php if (!isset($_SESSION['user'])): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/php/PHPCrowFundingApp/public/index.php?action=login">Connexion</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/php/PHPCrowFundingApp/public/index.php?action=register">Inscription</a>
+                    </li>
+                <?php else: ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/php/PHPCrowFundingApp/public/index.php?action=create">New project</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/php/PHPCrowFundingApp/public/index.php?action=dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/php/PHPCrowFundingApp/public/index.php?action=logout">Logout</a>
+                    </li>
+                <?php endif; ?>
             </ul>
-        </nav>
-    </header>
+        </div>
+    </nav>
 
-    <main>
-        <?php
-        // Include content of specific view
-        if (isset($content)) {
-            echo $content;
-        } else {
-            echo '<p>Content not available.</p>';
-        }
-        ?>
-    </main>
+    <div class="container mt-4">
+        <main>
+            <?php
+            if (isset($content)) {
+                echo $content;
+            } else {
+                echo '<p>Content not available.</p>';
+            }
+            ?>
+        </main>
+    </div>
 
-    <footer>
-        <p>&copy; 2024 Crowdfunding Platform</p>
+    <footer class="text-center mt-4">
+        <div class="container">
+            <p>&copy; 2024 IdeaNest. All rights reserved.</p>
+        </div>
     </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

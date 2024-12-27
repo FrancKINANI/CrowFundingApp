@@ -11,7 +11,6 @@ class HomeController {
     // Method to display the home page
     public function index() {
         $projects = $this->projectModel->getAllProjects();
-
         require_once __DIR__ . '/../Views/home.php';
     }
 }
