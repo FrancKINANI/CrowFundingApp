@@ -14,7 +14,8 @@ class DonationController {
 
     public function createDonation() {
         if (!isset($_SESSION['user'])) {
-            require __DIR__ . '/../Views/donation/create.php';
+            require __DIR__ . '/../Views/auth/login.php';
+            exit;
         }
         
         if (isset($_GET['project_id'])) {            
@@ -23,7 +24,7 @@ class DonationController {
             $project = $this->projectModel->getProjectById($projectId);
             if($totalDonations >= $project['goal_amount']){
                 $error = "The goal amount for this project has already been reached.";
-                header('Location: ' . $_SERVER['HTTP_REFERER']);
+                require __DIR__ . '/../Views/donation/create.php';
                 return false;
             }
             if ($project) {
@@ -49,15 +50,14 @@ class DonationController {
 
                     if ($amount <= 0) {
                         $error = "The donation amount must be greater than zero.";
-                        header('Location: ' . $_SERVER['HTTP_REFERER']);
                         return false;
                     }
 
                     $project = $this->projectModel->getProjectById($projectId);
                     $totalDonations = $this->donationModel->getTotalDonations($projectId);
-                    if ($totalDonations >= $project['goal_amount']) {
-                        $error =  "The goal amount for this project has already been reached.";
-                        header('Location: ' . $_SERVER['HTTP_REFERER']);
+                    if ($totalDonations + $amount > $project['goal_amount']) {
+                        $error = "The donation amount exceeds the goal amount for this project.";
+                        require_once __DIR__ . '/../Views/donation/create.php';
                         return false;
                     }
 
@@ -65,7 +65,7 @@ class DonationController {
                     header('Location: /php/PHPCrowFundingApp/public/index.php?action=dashboard');
                     exit;
                 } else {
-                    $error = "Project ID not provided.";
+                    $error = "Project Id not provided.";
                     return false;
                 }
             } else {
@@ -81,11 +81,14 @@ class DonationController {
     public function edit(){
         $donationId = $_GET['id'];
         $donation = $this->donationModel->getDonationById($donationId);
-        $project = $this->projectModel->getProjectById($donation['project_id']);
+        $projectId = $donation['project_id'];
+        $totalDonations = $this->donationModel->getTotalDonations($projectId);
+        $project = $this->projectModel->getProjectById($projectId);
         if ($donation) {
             require_once __DIR__ . '/../Views/donation/edit.php';
         } else {
             $error = "Donation not found.";
+            require_once __DIR__ . '/../Views/user/dashboard.php';
             exit;
         }
     }
@@ -102,7 +105,7 @@ class DonationController {
             if ($donation) {
                 require_once __DIR__ . '/../Views/donation/edit.php';
             } else {
-                $error = "Donation not found.";
+                echo "Donation not found.";
                 exit;
             }
         } else {
@@ -113,20 +116,43 @@ class DonationController {
 
     public function updateDonation() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $donationId = $_GET['id'];
-            $amount = $_POST['amount'];
-            $donation = $this->donationModel->getDonationById($donationId);
-            $project = $this->projectModel->getProjectById($donation['project_id']);
-            $userId = $_SESSION['user']['id'];
+            if (isset($_SESSION['user'])) {
+                $user = $_SESSION['user'];
+                $userId = $user['id'];
+                if (isset($_GET['id'])) {
+                    $donationId = $_GET['id'];
+                    $amount = $_POST['amount'];
+                    $donation = $this->donationModel->getDonationById($donationId);
+                    $projectId = $donation['project_id'];
 
-            if ($amount <= 0) {
-                $error = "The donation amount must be greater than zero.";
+                    if ($amount <= 0) {
+                        echo "The donation amount must be greater than zero.";
+                        header('Location: ' . $_SERVER['HTTP_REFERER']);
+                        return false;
+                    }
+
+                    $project = $this->projectModel->getProjectById($projectId);
+                    $totalDonations = $this->donationModel->getTotalDonations($projectId);
+                    $currentDonationAmount = $donation['amount'];
+                    $newTotalDonations = $totalDonations - $currentDonationAmount + $amount;
+
+                    if ($newTotalDonations > $project['goal_amount']) {
+                        $error = "The donation amount exceeds the goal amount for this project.";
+                        require_once __DIR__ . '/../Views/donation/edit.php';
+                        return false;
+                    }
+
+                    $this->donationModel->update($donationId, $amount, $projectId, $userId);
+                    header('Location: /php/PHPCrowFundingApp/public/index.php?action=dashboard');
+                    exit;
+                } else {
+                    echo "Donation Id not provided.";
+                    return false;
+                }
+            } else {
+                echo "User not logged in.";
                 return false;
             }
-
-            $this->donationModel->update($donationId, $amount, $project['id'], $userId);
-            header('Location: /php/PHPCrowFundingApp/public/index.php?action=dashboard');
-            exit;
         }
     }
 
@@ -160,7 +186,7 @@ class DonationController {
                 header('Location: /php/PHPCrowFundingApp/public/index.php?action=dashboard');
                 exit;
             } else {
-                $error = "Donation ID not provided.";
+                $error = "Donation Id not provided.";
                 exit;
             }
         }

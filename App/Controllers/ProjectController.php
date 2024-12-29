@@ -52,7 +52,6 @@ class ProjectController {
             $totalDonations = $this->donationModel->getTotalDonations($projectId);
             $goalAmount = $project['goal_amount'];
             $percentageRemaining = 100 - (($totalDonations / $goalAmount) * 100);
-
             require_once __DIR__ . '/../Views/projects/details.php';
         } else {
             header('Location: /php/PHPCrowFundingApp/public/index.php?action=home');

@@ -85,7 +85,7 @@ class Router {
                 $error = "500 - Internal Server Error.";
                 break;
             default:
-                $error = "An unexpected error occurred.";
+                $error = "An unexpected unknown error occurred.";
                 break;
         }
     }

@@ -37,20 +37,21 @@ CrowdfundingApp/
 │       ├── projects/
 │       │   ├── create.php
 │       │   ├── edit.php
-│       │   └── delete.php
+│       │   └── view.php
 │       └── donations/
 │       |   ├── create.php
 │       │   ├── edit.php
-│       │   └── delete.php
+│       │   └── view.php
 │       ├── home.php
 │       └── layout.php
 ├── Config/
 │   └── database.php
+│   └── autoload.php
 ├── public/
 │   ├── css/
 │   │   └── styles.css
 │   ├── js/
-│   │   └── script.js
+│   │   └── app.js
 │   └── index.php
 └── README.md
 ```
@@ -123,6 +124,10 @@ This project is open-source and available under the [MIT License](LICENSE).
 
 ## Contact
 For any inquiries, please contact:
-- **Name**: David
-- **Email**: fkinaninkaya@gmail.com
+- **Name**: Your Name
+- **Email**: your.email@example.com
 - **GitHub**: https://github.com/FrancKINANI/
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes

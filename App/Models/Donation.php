@@ -1,5 +1,4 @@
 <?php
-
 class Donation {
     private $db;
 

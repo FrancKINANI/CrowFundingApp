@@ -1,4 +1,5 @@
 <?php
+$title = 'Delete Donation';
 if (!isset($_SESSION)) {
     session_start();
 }

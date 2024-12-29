@@ -1,4 +1,5 @@
 <?php
+    $title = "Make a Donation";
     if(!isset($_SESSION)){
         session_start();
     }
@@ -12,10 +13,10 @@
         </div>
     <?php endif; ?>
         <div class="form-group">
-        <h1>Title: <?php echo htmlspecialchars($project['title']); ?></h1>
-        <p><strong>Description :</strong> <?php echo htmlspecialchars($project['description']); ?></p>
-        <p><strong>Goal :</strong> <?php echo htmlspecialchars($project['goal_amount']); ?> €</p>
-        <p><strong>Current Amount of Donations:</strong> <?php echo htmlspecialchars($totalDonations) ?> €</p>
+            <h1>Title: <?php echo htmlspecialchars($project['title']); ?></h1>
+            <p><strong>Description :</strong> <?php echo htmlspecialchars($project['description']); ?></p>
+            <p><strong>Goal :</strong> <?php echo htmlspecialchars($project['goal_amount']); ?> €</p>
+            <p><strong>Current Amount of Donations:</strong> <?php echo htmlspecialchars($totalDonations) ?> €</p>
         </div>
         <div class="form-group">
             <label for="amount">Donation Amount (€)</label>
