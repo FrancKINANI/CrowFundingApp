@@ -1,14 +1,14 @@
 # Crowdfunding Platform
 
 ## Description
-This is a simple crowdfunding platform built using PHP (with Object-Oriented Programming), MySQL, HTML, CSS, and JavaScript. It allows users to register, log in, create crowdfunding projects, and contribute to projects. The project follows the MVC (Model-View-Controller) architecture for better organization and maintainability.
+This is a simple crowdfunding platform built using PHP (with Object-Oriented Programming), MySQL, HTML, CSS, and JavaScript. It allows users to register, log in, create crowdfunding campaigns, and contribute to campaigns. The project follows the MVC (Model-View-Controller) architecture for better organization and maintainability.
 
 ---
 
 ## Features
 - User Registration and Authentication
-- Create, View, Edit, and Delete Crowdfunding projects
-- Contribute to projects
+- Create, View, Edit, and Delete Crowdfunding Campaigns
+- Contribute to Campaigns
 - View Contribution History
 - Responsive Design
 
@@ -37,20 +37,21 @@ CrowdfundingApp/
 │       ├── projects/
 │       │   ├── create.php
 │       │   ├── edit.php
-│       │   └── delete.php
+│       │   └── view.php
 │       └── donations/
 │       |   ├── create.php
 │       │   ├── edit.php
-│       │   └── delete.php
+│       │   └── view.php
 │       ├── home.php
 │       └── layout.php
 ├── Config/
 │   └── database.php
+│   └── autoload.php
 ├── public/
 │   ├── css/
 │   │   └── styles.css
 │   ├── js/
-│   │   └── script.js
+│   │   └── app.js
 │   └── index.php
 └── README.md
 ```
@@ -87,16 +88,16 @@ CrowdfundingApp/
 5. Start the server:
    - Place the project folder in the `htdocs` directory of XAMPP.
    - Start Apache and MySQL in XAMPP.
-   - Open a browser and navigate to `http://localhost/CrowdfundingApp/App/Views/home.php`.
+   - Open a browser and navigate to `http://localhost/CrowdfundingApp/public/index.php`.
 
 ---
 
 ## Usage
 1. **Register**: Create an account by visiting the registration page.
 2. **Login**: Log in using your credentials.
-3. **Create projects**: After logging in, create new crowdfunding project.
-4. **Contribute**: View and contribute to existing project.
-5. **Manage Campaigns**: Edit or delete projects you created.
+3. **Create Campaigns**: After logging in, create new crowdfunding campaigns.
+4. **Contribute**: View and contribute to existing campaigns.
+5. **Manage Campaigns**: Edit or delete campaigns you created.
 
 ---
 
@@ -109,9 +110,9 @@ CrowdfundingApp/
 ---
 
 ## Future Improvements
-- Add user roles (e.g., Admin, Contributor, project Owner).
-- Add search and filter functionality for projects.
-- Implement email notifications for projects updates.
+- Add user roles (e.g., Admin, Contributor, Campaign Owner).
+- Add search and filter functionality for campaigns.
+- Implement email notifications for campaign updates.
 - Add a payment gateway for real contributions.
 
 ---
@@ -123,6 +124,10 @@ This project is open-source and available under the [MIT License](LICENSE).
 
 ## Contact
 For any inquiries, please contact:
-- **Name**: David
-- **Email**: fkinaninkaya@gmail.com
+- **Name**: Your Name
+- **Email**: your.email@example.com
 - **GitHub**: https://github.com/FrancKINANI/
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes

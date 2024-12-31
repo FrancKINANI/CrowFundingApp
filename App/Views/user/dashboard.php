@@ -7,6 +7,7 @@ ob_start();
 ?>
 <div class="container mt-4">
     <h1 class="text-center">Dashboard</h1>
+    <hr class="my-4">
     <?php if (isset($error) && $error): ?>
         <div class="alert alert-danger">
             <?php echo htmlspecialchars($error); ?>
@@ -33,7 +34,7 @@ ob_start();
                                 <td><?php echo htmlspecialchars($project['description']); ?></td>
                                 <td><?php echo htmlspecialchars($project['goal_amount']); ?> €</td>
                                 <td>
-                                    <a href="/php/PHPCrowFundingApp/public/index.php?action=detailsProject&project_id=<?php echo $project['id']; ?>" class="btn btn-primary btn-sm">Details</a>
+                                    <a href="/php/PHPCrowFundingApp/public/index.php?action=detailsProject&id=<?php echo $project['id']; ?>" class="btn btn-primary btn-sm">Details</a>
                                     <a href="/php/PHPCrowFundingApp/public/index.php?action=editProject&project_id=<?php echo $project['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
                                     <a href="/php/PHPCrowFundingApp/public/index.php?action=deleteProject&project_id=<?php echo $project['id']; ?>" class="btn btn-danger btn-sm">Delete</a>
                                 </td>

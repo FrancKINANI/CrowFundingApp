@@ -1,6 +1,7 @@
 <?php $title = "New Project"; ob_start(); ?>
 <div class="container mt-5">
     <h1 class="text-center">Create a project</h1>
+    <hr class="my-4">
     <?php if (isset($error) && $error): ?>
         <div class="alert alert-danger">
             <?php echo htmlspecialchars($error); ?>

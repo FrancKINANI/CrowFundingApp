@@ -27,6 +27,7 @@ class ProjectController {
             $projectGoal = $_POST['goalAmount']; 
             $projectUser_id = $_SESSION['user']['id'];
             $this->projectModel->addProject($projectTitle, $projectDescription, $projectGoal, $projectUser_id);
+            $projects = $this->projectModel->getAllProjects();
             require __DIR__ . '/../Views/projects/list.php';
         }
     }
@@ -92,7 +93,7 @@ class ProjectController {
                 header('Location: /php/PHPCrowFundingApp/public/index.php?action=dashboard');
                 exit;
             } else {
-                $error = "Project ID not provided.";
+                $error = "Project Id not provided.";
                 exit;
             }
         }
@@ -122,7 +123,7 @@ class ProjectController {
                 header('Location: /php/PHPCrowFundingApp/public/index.php?action=dashboard');
                 exit;
             } else {
-                $error = "Project ID not provided.";
+                $error = "Project Id not provided.";
                 exit;
             }
         }

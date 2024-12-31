@@ -38,6 +38,7 @@ class Router {
                 'editDonation' => [DonationController::class, 'edit'],
                 'deleteProject' => [ProjectController::class, 'delete'],
                 'deleteDonation' => [DonationController::class, 'deleteDonation'],
+                'detailsProject' => [ProjectController::class, 'details'],
             ],
             'POST' => [
                 'login' => [AuthController::class, 'login'],

@@ -8,6 +8,7 @@ ob_start();
 ?>
 <div class="container mt-5">
     <h1 class="text-center">Inscription</h1>
+    <hr class="my-4">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <?php if (isset($error) && $error): ?>
