@@ -55,6 +55,13 @@ class AuthController {
                             $donationProjects[$projectId] = $project;
                             $totalInvested += $donation['amount'];
                         }
+
+                        foreach ($userProjects as &$project) {
+                            $projectId = $project['id'];
+                            $project['total_donations'] = $this->donationModel->getTotalDonations($projectId);
+                            $project['percentage_remaining'] = floor(100 - (100 - (($project['total_donations'] / $project['goal_amount']) * 100)));
+                            $project['contributors'] = $this->donationModel->getContributorsByProjectId($projectId);
+                        }
                         require_once __DIR__ . '/../Views/user/dashboard.php';
                         exit;
                     }else{
@@ -106,6 +113,13 @@ class AuthController {
                                     $project['percentage_remaining'] = floor($percentageRemaining);
                                     $donationProjects[$projectId] = $project;
                                     $totalInvested += $donation['amount'];
+                                }
+
+                                foreach ($userProjects as &$project) {
+                                    $projectId = $project['id'];
+                                    $project['total_donations'] = $this->donationModel->getTotalDonations($projectId);
+                                    $project['percentage_remaining'] = floor(100 - (100 - (($project['total_donations'] / $project['goal_amount']) * 100)));
+                                    $project['contributors'] = $this->donationModel->getContributorsByProjectId($projectId);
                                 }
                             }
                             header('Location: /php/PHPCrowFundingApp/public/index.php?action=dashboard');

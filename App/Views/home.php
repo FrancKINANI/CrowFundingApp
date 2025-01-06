@@ -5,7 +5,6 @@ if (!isset($_SESSION)) {
     session_start();
 }
 
-$db = Database::getInstance();
 
 ob_start();
 ?>

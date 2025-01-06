@@ -23,6 +23,9 @@ ob_start();
                         <th>Project Title</th>
                         <th>Description</th>
                         <th>Goal Amount</th>
+                        <th>Current Amount</th>
+                        <th>Percentage Completed</th>
+                        <th>Contributors</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -30,11 +33,23 @@ ob_start();
                     <?php if (!empty($userProjects)): ?>
                         <?php foreach ($userProjects as $project): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($project['title']); ?></td>
-                                <td><?php echo htmlspecialchars($project['description']); ?></td>
+                                <td><?php echo htmlspecialchars(ucfirst($project['title'])); ?></td>
+                                <td><?php echo htmlspecialchars(ucfirst($project['description'])); ?></td>
                                 <td><?php echo htmlspecialchars($project['goal_amount']); ?> €</td>
+                                <td><?php echo htmlspecialchars($project['total_donations'] ?? 0); ?> €</td>
+                                <td><?php echo htmlspecialchars($project['percentage_remaining'] ?? 0); ?> %</td>
                                 <td>
-                                    <a href="/php/PHPCrowFundingApp/public/index.php?action=detailsProject&id=<?php echo $project['id']; ?>" class="btn btn-primary btn-sm">Details</a>
+                                    <?php if (!empty($project['contributors'])): ?>
+                                        <ul>
+                                            <?php foreach ($project['contributors'] as $contributor): ?>
+                                                <li><?php echo htmlspecialchars(ucwords($contributor['name'])); ?> (<?php echo htmlspecialchars($contributor['email']);?>) <br> Amount:  <?php echo htmlspecialchars($contributor['amount']); ?> €</li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    <?php else: ?>
+                                        No contributors yet.
+                                    <?php endif; ?>
+                                </td>
+                                <td>
                                     <a href="/php/PHPCrowFundingApp/public/index.php?action=editProject&project_id=<?php echo $project['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
                                     <a href="/php/PHPCrowFundingApp/public/index.php?action=deleteProject&project_id=<?php echo $project['id']; ?>" class="btn btn-danger btn-sm">Delete</a>
                                 </td>
@@ -42,7 +57,7 @@ ob_start();
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="4" class="text-center">No projects found.</td>
+                            <td colspan="7" class="text-center">No projects found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -53,35 +68,30 @@ ob_start();
                 <thead>
                     <tr>
                         <th>Project Title</th>
-                        <th>Goal Amount</th>
                         <th>Donation Amount</th>
                         <th>Total Donations</th>
-                        <th>Percentage Remaining</th>
-                        <th>Actions</th>
+                        <th>Percentage Completed</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (!empty($userDonations)): ?>
                         <?php foreach ($userDonations as $donation): ?>
-                            <?php $project = $donationProjects[$donation['project_id']]; ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($project['title']); ?></td>
-                                <td><?php echo htmlspecialchars($project['goal_amount']); ?></td>
-                                <td><?php echo htmlspecialchars($donation['amount']); ?> €</td>
-                                <td><?php echo htmlspecialchars($project['total_donations']); ?> €</td>
-                                <td><?php echo htmlspecialchars($project['percentage_remaining']); ?> %</td>
-                                <td>
-                                    <a href="/php/PHPCrowFundingApp/public/index.php?action=editDonation&id=<?php echo $donation['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
-                                    <a href="/php/PHPCrowFundingApp/public/index.php?action=deleteDonation&id=<?php echo $donation['id']; ?>" class="btn btn-danger btn-sm">Delete</a>
-                                </td>
-                            </tr>
+                            <?php $project = $donationProjects[$donation['project_id']] ?? null; ?>
+                            <?php if ($project): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars(ucfirst($project['title'])); ?></td>
+                                    <td><?php echo htmlspecialchars($donation['amount']); ?> €</td>
+                                    <td><?php echo htmlspecialchars($project['total_donations'] ?? 0); ?> €</td>
+                                    <td><?php echo htmlspecialchars($project['percentage_remaining'] ?? 0); ?> %</td>
+                                </tr>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                         <tr>
-                            <td colspan="1" class="text-right"><strong>Total Invested: <?php echo htmlspecialchars($totalInvested); ?> €</strong></td>
+                            <td colspan="4" class="text-right"><strong>Total Invested: <?php echo htmlspecialchars($totalInvested); ?> €</strong></td>
                         </tr>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6" class="text-center">No donations found.</td>
+                            <td colspan="4" class="text-center">No donations found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>

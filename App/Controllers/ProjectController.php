@@ -17,6 +17,10 @@ class ProjectController {
     }
 
     public function createProject(){
+        if (!isset($_SESSION['user'])) {
+            require __DIR__ . '/../Views/auth/login.php';
+            exit;
+        }
         require __DIR__ . '/../Views/projects/create.php';
     }
 

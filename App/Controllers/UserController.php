@@ -41,9 +41,16 @@ class UserController {
                 $goalAmount = $project['goal_amount'];
                 $percentageRemaining = 100 - (($totalDonations / $goalAmount) * 100);
                 $project['total_donations'] = $totalDonations;
-                $project['percentage_remaining'] = floor($percentageRemaining);
+                $project['percentage_remaining'] = round($percentageRemaining, 2);
                 $donationProjects[$projectId] = $project;
                 $totalInvested += $donation['amount'];
+            }
+
+            foreach ($userProjects as &$project) {
+                $projectId = $project['id'];
+                $project['total_donations'] = $this->donationModel->getTotalDonations($projectId);
+                $project['percentage_remaining'] = round((100 - (100 - (($project['total_donations'] / $project['goal_amount']) * 100))), 2);
+                $project['contributors'] = $this->donationModel->getContributorsByProjectId($projectId);
             }
 
             require_once __DIR__ . '/../Views/user/dashboard.php';

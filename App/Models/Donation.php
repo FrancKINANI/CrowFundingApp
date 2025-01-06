@@ -58,4 +58,16 @@ class Donation {
         $stmt->bindParam(':id', $donationId);
         return $stmt->execute();
     }
+
+    public function getContributorsByProjectId($projectId) {
+        $stmt = $this->db->prepare('
+            SELECT users.name, users.email, donations.amount
+            FROM donations
+            JOIN users ON donations.user_id = users.id
+            WHERE donations.project_id = :project_id
+        ');
+        $stmt->bindParam(':project_id', $projectId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
