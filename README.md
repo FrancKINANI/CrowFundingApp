@@ -1,4 +1,4 @@
-# PHP Crowdfunding Platform
+# Crowdfunding Platform
 
 ## Description
 This is a simple crowdfunding platform built using PHP (with Object-Oriented Programming), MySQL, HTML, CSS, and JavaScript. It allows users to register, log in, create crowdfunding projects, and contribute to projects. The project follows the MVC (Model-View-Controller) architecture for better organization and maintainability.
