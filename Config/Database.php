@@ -8,7 +8,7 @@ class Database {
         $host = 'localhost';
         $dbname = 'crowdfundingDb';
         $username = 'root';
-        $password = 'Justine@2227';
+        $password = ''; # your db password here
 
         try {
             $this->connection = new PDO("mysql:host=$host", $username, $password);
