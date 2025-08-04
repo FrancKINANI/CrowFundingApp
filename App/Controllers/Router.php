@@ -9,6 +9,8 @@ require_once __DIR__ . '/../../App/Controllers/ProjectController.php';
 require_once __DIR__ . '/../../App/Controllers/AuthController.php';
 require_once __DIR__ . '/../../App/Controllers/UserController.php';
 require_once __DIR__ . '/../../App/Controllers/DonationController.php';
+require_once __DIR__ . '/../../App/Controllers/CategoryController.php';
+require_once __DIR__ . '/../../App/Controllers/SearchController.php';
 
 
 
@@ -25,30 +27,64 @@ class Router {
     private function defineRoutes() {
         $this->routes = [
             'GET' => [
+                // Core routes
                 'home' => [HomeController::class, 'index'],
                 'login' => [AuthController::class, 'showLoginForm'],
                 'register' => [AuthController::class, 'showRegisterForm'],
-                'create' => [ProjectController::class, 'createProject'],
-                'dashboard' => [UserController::class, 'dashboard'],
-                'donate' => [DonationController::class, 'createDonation'],
-                'projectDetails' => [ProjectController::class, 'details'],
                 'logout' => [AuthController::class, 'logout'],
+                'dashboard' => [UserController::class, 'dashboard'],
+
+                // Project routes
+                'create' => [ProjectController::class, 'createProject'],
+                'projectDetails' => [ProjectController::class, 'details'],
                 'list' => [ProjectController::class, 'list'],
                 'editProject' => [ProjectController::class, 'edit'],
-                'editDonation' => [DonationController::class, 'edit'],
                 'deleteProject' => [ProjectController::class, 'delete'],
-                'deleteDonation' => [DonationController::class, 'deleteDonation'],
                 'detailsProject' => [ProjectController::class, 'details'],
+
+                // Donation routes
+                'donate' => [DonationController::class, 'createDonation'],
+                'editDonation' => [DonationController::class, 'edit'],
+                'deleteDonation' => [DonationController::class, 'deleteDonation'],
+
+                // Category routes
+                'categories' => [CategoryController::class, 'index'],
+                'category' => [CategoryController::class, 'show'],
+
+                // Search routes
+                'search' => [SearchController::class, 'search'],
+                'search_advanced' => [SearchController::class, 'advanced'],
+                'search_suggestions' => [SearchController::class, 'suggestions'],
+                'search_filter' => [SearchController::class, 'filter'],
+                'trending' => [SearchController::class, 'trending'],
+                'ending_soon' => [SearchController::class, 'endingSoon'],
+
+                // Admin routes
+                'admin_categories' => [CategoryController::class, 'adminIndex'],
+                'admin_category_create' => [CategoryController::class, 'create'],
+                'admin_category_edit' => [CategoryController::class, 'edit'],
+                'admin_category_toggle' => [CategoryController::class, 'toggleStatus'],
+                'admin_category_delete' => [CategoryController::class, 'delete'],
             ],
             'POST' => [
+                // Authentication
                 'login' => [AuthController::class, 'login'],
                 'register' => [AuthController::class, 'register'],
+
+                // Projects
                 'create' => [ProjectController::class, 'create'],
-                'submitDonation' => [DonationController::class, 'submit'],
                 'updateProject' => [ProjectController::class, 'updateProject'],
-                'updateDonation' => [DonationController::class, 'updateDonation'],
                 'confirmDeleteProject' => [ProjectController::class, 'confirmDelete'],
+
+                // Donations
+                'submitDonation' => [DonationController::class, 'submit'],
+                'updateDonation' => [DonationController::class, 'updateDonation'],
                 'confirmDeleteDonation' => [DonationController::class, 'confirmDeleteDonation'],
+
+                // Admin categories
+                'admin_category_create' => [CategoryController::class, 'create'],
+                'admin_category_edit' => [CategoryController::class, 'edit'],
+                'admin_category_delete' => [CategoryController::class, 'delete'],
             ]
         ];
     }
