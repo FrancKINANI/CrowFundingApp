@@ -1,0 +1,23 @@
+# CrowdFunding Platform - Root Directory Configuration
+
+# Redirect all requests to public folder
+RewriteEngine On
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^(.*)$ /public/$1 [L,R=301]
+
+# Security: Deny access to sensitive files and directories
+<FilesMatch "\.(env|log|sql|conf|htaccess|htpasswd|ini|sh)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Deny access to directories
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>
+
+# Deny access to App, Config, logs directories
+RedirectMatch 404 /App/.*
+RedirectMatch 404 /Config/.*
+RedirectMatch 404 /logs/.*
+RedirectMatch 404 /\..*

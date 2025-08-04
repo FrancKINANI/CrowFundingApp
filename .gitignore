@@ -1,25 +1,73 @@
-# CakePHP 3
+# CrowdFunding Platform - Git Ignore
 
-/vendor/*
-/config/app.php
+# Environment files
+.env
+.env.local
+.env.production
+.env.staging
 
-/tmp/cache/models/*
-!/tmp/cache/models/empty
-/tmp/cache/persistent/*
-!/tmp/cache/persistent/empty
-/tmp/cache/views/*
-!/tmp/cache/views/empty
-/tmp/sessions/*
-!/tmp/sessions/empty
-/tmp/tests/*
-!/tmp/tests/empty
+# Logs
+logs/
+*.log
+error.log
+access.log
 
-/logs/*
-!/logs/empty
+# Cache
+cache/
+tmp/
+temp/
 
-# CakePHP 2
+# Uploads
+uploads/
+files/
 
-/app/tmp/*
-/app/Config/core.php
-/app/Config/database.php
-/vendors/*
+# Composer
+vendor/
+composer.lock
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*.sql.gz
+*.sql.bz2
+
+# Node modules (if using npm/yarn)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build files
+dist/
+build/
+
+# Test files
+coverage/
+.phpunit.result.cache
+
+# Local configuration
+config.local.php
+database.local.php
+
+# Session files
+sessions/
+
+# Error pages
+50x.html
+404.html

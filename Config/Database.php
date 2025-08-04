@@ -5,18 +5,29 @@ class Database {
     private $connection;
 
     private function __construct() {
-        $host = 'localhost';
-        $dbname = 'crowdfundingDb';
-        $username = 'root';
-        $password = ''; # your db password here
+        // Load environment variables
+        $host = $_ENV['DB_HOST'] ?? getenv('DB_HOST') ?? 'localhost';
+        $dbname = $_ENV['DB_NAME'] ?? getenv('DB_NAME') ?? 'crowdfundingDb';
+        $username = $_ENV['DB_USERNAME'] ?? getenv('DB_USERNAME') ?? 'root';
+        $password = $_ENV['DB_PASSWORD'] ?? getenv('DB_PASSWORD') ?? '';
+        $port = $_ENV['DB_PORT'] ?? getenv('DB_PORT') ?? '3306';
 
         try {
-            $this->connection = new PDO("mysql:host=$host", $username, $password);
-            $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $dsn = "mysql:host=$host;port=$port;charset=utf8mb4";
+            $this->connection = new PDO($dsn, $username, $password, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
+            ]);
             $this->createDatabase($dbname);
         } catch (PDOException $e) {
-            die("Database connection error: " . $e->getMessage());
+            error_log("Database connection error: " . $e->getMessage());
+            if ($_ENV['APP_ENV'] ?? 'production' === 'development') {
+                die("Database connection error: " . $e->getMessage());
+            } else {
+                die("Database connection error. Please try again later.");
+            }
         }
     }
 
