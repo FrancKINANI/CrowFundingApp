@@ -1,6 +1,6 @@
 {
     "name": "franckinani/crowdfunding-platform",
-    "description": "A modern crowdfunding platform built with PHP",
+    "description": "A professional SaaS crowdfunding platform built with PHP",
     "type": "project",
     "license": "MIT",
     "authors": [
@@ -10,14 +10,40 @@
         }
     ],
     "require": {
-        "php": ">=7.4",
+        "php": ">=8.1",
         "ext-pdo": "*",
         "ext-json": "*",
         "ext-mbstring": "*",
-        "ext-openssl": "*"
+        "ext-openssl": "*",
+        "ext-curl": "*",
+        "ext-gd": "*",
+        "ext-zip": "*",
+        "ext-intl": "*",
+        "ext-redis": "*",
+        "stripe/stripe-php": "^10.0",
+        "phpmailer/phpmailer": "^6.8",
+        "monolog/monolog": "^3.0",
+        "vlucas/phpdotenv": "^5.5",
+        "firebase/php-jwt": "^6.8",
+        "robthree/twofactorauth": "^1.8",
+        "league/csv": "^9.8",
+        "intervention/image": "^2.7",
+        "predis/predis": "^2.2",
+        "elasticsearch/elasticsearch": "^8.8",
+        "guzzlehttp/guzzle": "^7.7",
+        "ramsey/uuid": "^4.7",
+        "nesbot/carbon": "^2.68",
+        "respect/validation": "^2.2"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.0"
+        "phpunit/phpunit": "^10.0",
+        "mockery/mockery": "^1.6",
+        "fakerphp/faker": "^1.23",
+        "phpstan/phpstan": "^1.10",
+        "friendsofphp/php-cs-fixer": "^3.21",
+        "phpmd/phpmd": "^2.13",
+        "squizlabs/php_codesniffer": "^3.7",
+        "roave/security-advisories": "dev-latest"
     },
     "autoload": {
         "psr-4": {
@@ -35,9 +61,33 @@
     },
     "scripts": {
         "test": "phpunit",
+        "test:unit": "phpunit tests/Unit",
+        "test:integration": "phpunit tests/Integration",
+        "test:coverage": "phpunit --coverage-html coverage",
         "serve": "php -S localhost:8000 -t public",
+        "serve:dev": "php -S localhost:8000 -t public -d display_errors=1",
+        "cs:check": "php-cs-fixer fix --dry-run --diff",
+        "cs:fix": "php-cs-fixer fix",
+        "stan": "phpstan analyse --memory-limit=2G",
+        "security": "composer audit",
+        "quality": [
+            "@cs:check",
+            "@stan",
+            "@security"
+        ],
         "post-install-cmd": [
-            "@php -r \"copy('.env.example', '.env');\""
+            "@php -r \"if (!file_exists('.env')) copy('.env.example', '.env');\"",
+            "@php -r \"if (!is_dir('uploads')) mkdir('uploads', 0755, true);\"",
+            "@php -r \"if (!is_dir('logs')) mkdir('logs', 0755, true);\"",
+            "@php -r \"if (!is_dir('cache')) mkdir('cache', 0755, true);\""
+        ],
+        "post-update-cmd": [
+            "@post-install-cmd"
+        ],
+        "setup": [
+            "@composer install",
+            "@php -r \"copy('.env.example', '.env');\"",
+            "echo 'Please update .env file with your configuration'"
         ]
     },
     "config": {
