@@ -1,0 +1,251 @@
+version: '3.8'
+
+services:
+  # Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: crowdfunding_app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./uploads:/var/www/html/uploads
+      - ./logs:/var/www/html/logs
+      - ./cache:/var/www/html/cache
+    environment:
+      - APP_ENV=development
+      - APP_DEBUG=true
+      - DB_HOST=mysql
+      - DB_NAME=crowdfunding_dev
+      - DB_USERNAME=crowdfunding
+      - DB_PASSWORD=secret
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - crowdfunding_network
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: crowdfunding_mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: crowdfunding_dev
+      MYSQL_USER: crowdfunding
+      MYSQL_PASSWORD: secret
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./Config/TestData.sql:/docker-entrypoint-initdb.d/01-test-data.sql
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - crowdfunding_network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: crowdfunding_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass redispassword
+    networks:
+      - crowdfunding_network
+
+  # Nginx Load Balancer (for production scaling)
+  nginx:
+    image: nginx:alpine
+    container_name: crowdfunding_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+      - ./uploads:/var/www/html/uploads:ro
+    depends_on:
+      - app
+    networks:
+      - crowdfunding_network
+
+  # Elasticsearch (for advanced search)
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+    container_name: crowdfunding_elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - crowdfunding_network
+
+  # Kibana (for log analysis)
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.8.0
+    container_name: crowdfunding_kibana
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - crowdfunding_network
+
+  # MailHog (for email testing)
+  mailhog:
+    image: mailhog/mailhog
+    container_name: crowdfunding_mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - crowdfunding_network
+
+  # Adminer (Database management)
+  adminer:
+    image: adminer
+    container_name: crowdfunding_adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+    depends_on:
+      - mysql
+    networks:
+      - crowdfunding_network
+
+  # Redis Commander (Redis management)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: crowdfunding_redis_commander
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+    environment:
+      REDIS_HOSTS: local:redis:6379:0:redispassword
+    depends_on:
+      - redis
+    networks:
+      - crowdfunding_network
+
+  # Queue Worker (for background jobs)
+  queue-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: crowdfunding_queue_worker
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    environment:
+      - APP_ENV=development
+      - DB_HOST=mysql
+      - DB_NAME=crowdfunding_dev
+      - DB_USERNAME=crowdfunding
+      - DB_PASSWORD=secret
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    command: php /var/www/html/App/Console/QueueWorker.php
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - crowdfunding_network
+
+  # Scheduler (for cron jobs)
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: crowdfunding_scheduler
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    environment:
+      - APP_ENV=development
+      - DB_HOST=mysql
+      - DB_NAME=crowdfunding_dev
+      - DB_USERNAME=crowdfunding
+      - DB_PASSWORD=secret
+    command: php /var/www/html/App/Console/Scheduler.php
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - crowdfunding_network
+
+  # Monitoring with Prometheus
+  prometheus:
+    image: prom/prometheus
+    container_name: crowdfunding_prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - crowdfunding_network
+
+  # Grafana for metrics visualization
+  grafana:
+    image: grafana/grafana
+    container_name: crowdfunding_grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    networks:
+      - crowdfunding_network
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  crowdfunding_network:
+    driver: bridge

@@ -1,0 +1,380 @@
+version: '3.8'
+
+services:
+  # Application (Production)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: crowdfunding_app_prod
+    restart: unless-stopped
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_HOST=mysql
+      - DB_NAME=${DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - APP_KEY=${APP_KEY}
+    volumes:
+      - app_uploads:/var/www/html/uploads
+      - app_logs:/var/www/html/logs
+      - app_cache:/var/www/html/cache
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - crowdfunding_network
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Load Balancer
+  nginx:
+    image: nginx:alpine
+    container_name: crowdfunding_nginx_prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/prod.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+      - app_uploads:/var/www/html/uploads:ro
+      - certbot_certs:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot:ro
+    depends_on:
+      - app
+    networks:
+      - crowdfunding_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  # SSL Certificate Management
+  certbot:
+    image: certbot/certbot
+    container_name: crowdfunding_certbot
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    command: certonly --webroot --webroot-path=/var/www/certbot --email ${SSL_EMAIL} --agree-tos --no-eff-email -d ${DOMAIN} -d www.${DOMAIN}
+    networks:
+      - crowdfunding_network
+
+  # MySQL Database (Production)
+  mysql:
+    image: mysql:8.0
+    container_name: crowdfunding_mysql_prod
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/prod.cnf:/etc/mysql/conf.d/custom.cnf
+      - mysql_backups:/backups
+    command: --default-authentication-plugin=mysql_native_password --innodb-buffer-pool-size=1G
+    networks:
+      - crowdfunding_network
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
+  # Redis Cache (Production)
+  redis:
+    image: redis:7-alpine
+    container_name: crowdfunding_redis_prod
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD} --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - crowdfunding_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # Queue Worker
+  queue-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: crowdfunding_queue_worker_prod
+    restart: unless-stopped
+    environment:
+      - APP_ENV=production
+      - DB_HOST=mysql
+      - DB_NAME=${DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    command: php /var/www/html/App/Console/QueueWorker.php
+    volumes:
+      - app_logs:/var/www/html/logs
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - crowdfunding_network
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # Scheduler
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: crowdfunding_scheduler_prod
+    restart: unless-stopped
+    environment:
+      - APP_ENV=production
+      - DB_HOST=mysql
+      - DB_NAME=${DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    command: php /var/www/html/App/Console/Scheduler.php
+    volumes:
+      - app_logs:/var/www/html/logs
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - crowdfunding_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+
+  # Database Backup Service
+  db-backup:
+    image: mysql:8.0
+    container_name: crowdfunding_backup
+    restart: "no"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    volumes:
+      - mysql_backups:/backups
+      - ./scripts/backup.sh:/backup.sh
+    command: /backup.sh
+    depends_on:
+      - mysql
+    networks:
+      - crowdfunding_network
+    profiles:
+      - backup
+
+  # Monitoring - Prometheus
+  prometheus:
+    image: prom/prometheus
+    container_name: crowdfunding_prometheus_prod
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prod.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    networks:
+      - crowdfunding_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # Monitoring - Grafana
+  grafana:
+    image: grafana/grafana
+    container_name: crowdfunding_grafana_prod
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/prod:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    networks:
+      - crowdfunding_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # Log Management - Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+    container_name: crowdfunding_elasticsearch_prod
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - crowdfunding_network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+
+  # Log Management - Logstash
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.8.0
+    container_name: crowdfunding_logstash_prod
+    restart: unless-stopped
+    volumes:
+      - ./docker/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - app_logs:/var/log/app:ro
+    depends_on:
+      - elasticsearch
+    networks:
+      - crowdfunding_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+
+  # Log Management - Kibana
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.8.0
+    container_name: crowdfunding_kibana_prod
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - crowdfunding_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # Error Tracking - Sentry (self-hosted)
+  sentry:
+    image: sentry:latest
+    container_name: crowdfunding_sentry_prod
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    environment:
+      SENTRY_SECRET_KEY: ${SENTRY_SECRET_KEY}
+      SENTRY_POSTGRES_HOST: sentry-postgres
+      SENTRY_POSTGRES_PORT: 5432
+      SENTRY_DB_NAME: sentry
+      SENTRY_DB_USER: sentry
+      SENTRY_DB_PASSWORD: ${SENTRY_DB_PASSWORD}
+      SENTRY_REDIS_HOST: redis
+      SENTRY_REDIS_PORT: 6379
+      SENTRY_REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      - sentry-postgres
+      - redis
+    networks:
+      - crowdfunding_network
+
+  # Sentry Database
+  sentry-postgres:
+    image: postgres:15
+    container_name: crowdfunding_sentry_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sentry
+      POSTGRES_USER: sentry
+      POSTGRES_PASSWORD: ${SENTRY_DB_PASSWORD}
+    volumes:
+      - sentry_postgres_data:/var/lib/postgresql/data
+    networks:
+      - crowdfunding_network
+
+volumes:
+  mysql_data:
+    driver: local
+  mysql_backups:
+    driver: local
+  redis_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  sentry_postgres_data:
+    driver: local
+  app_uploads:
+    driver: local
+  app_logs:
+    driver: local
+  app_cache:
+    driver: local
+  certbot_certs:
+    driver: local
+  certbot_www:
+    driver: local
+
+networks:
+  crowdfunding_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
